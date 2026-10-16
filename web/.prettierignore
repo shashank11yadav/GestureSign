@@ -1,0 +1,8 @@
+dist
+dist-test
+public/vendor
+public/models
+public/replay
+playwright-report
+test-results
+package-lock.json
