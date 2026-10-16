@@ -34,13 +34,14 @@ dropout = 0.1
 cosine_scale = 16.0
 
 [train]
+# About 1.5 min per epoch on an M4 (MPS); early stopping usually ends sooner.
 batch_size = 128
-epochs = 60
+epochs = 50
 lr = 1e-3
 weight_decay = 0.05
 warmup_epochs = 2
 label_smoothing = 0.1
-patience = 10
+patience = 8
 grad_clip = 1.0
 device = "auto"
 
