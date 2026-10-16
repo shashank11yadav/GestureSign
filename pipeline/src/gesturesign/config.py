@@ -88,8 +88,6 @@ class EvalConfig:
     few_shot_ways: int = 8
     few_shot_shots: int = 3
     few_shot_episodes: int = 1000
-    # A taught gesture must beat the runner-up by this cosine margin.
-    teach_margin: float = 0.04
 
 
 @dataclass(frozen=True)

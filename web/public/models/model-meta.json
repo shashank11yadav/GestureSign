@@ -24,6 +24,6 @@
  },
  "teach": {
   "minSimilarity": 0.9662,
-  "margin": 0.04
+  "margin": 0.0087
  }
 }

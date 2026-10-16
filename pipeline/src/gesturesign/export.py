@@ -118,8 +118,8 @@ def _labels(signs: list[str], shipped: list[bool], top1: list[float | None]) -> 
     }
 
 
-def _stub_teach_threshold(model: SignModel, cfg: Config) -> float:
-    """Few-shot threshold for the untrained model, measured on synthetic clips."""
+def _stub_teach_thresholds(model: SignModel, cfg: Config) -> dict[str, float]:
+    """Few-shot thresholds for the untrained model, measured on synthetic clips."""
     rng = np.random.default_rng(STUB_SEED)
     embeddings, labels = [], []
     with torch.no_grad():
@@ -130,7 +130,10 @@ def _stub_teach_threshold(model: SignModel, cfg: Config) -> float:
                 embeddings.append(model(x)[1][0].numpy())
                 labels.append(label)
     result = few_shot(np.stack(embeddings), np.asarray(labels), rng, episodes=200)
-    return round(result["min_similarity"], 4)
+    return {
+        "minSimilarity": round(result["min_similarity"], 4),
+        "margin": round(result["margin"], 4),
+    }
 
 
 def export_stub(cfg: Config, out_dir: Path, labels: list[str]) -> list[Path]:
@@ -147,10 +150,7 @@ def export_stub(cfg: Config, out_dir: Path, labels: list[str]) -> list[Path]:
         trainedOn=None,
         metrics=None,
         calibration={"temperature": 1.0, "notSureBelow": STUB_NOT_SURE},
-        teach={
-            "minSimilarity": _stub_teach_threshold(model, cfg),
-            "margin": cfg.evaluate.teach_margin,
-        },
+        teach=_stub_teach_thresholds(model, cfg),
     )
     _write_json(out_dir / "model-meta.json", meta)
     _write_json(

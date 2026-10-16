@@ -154,9 +154,9 @@ def few_shot(
     y = np.asarray(labels)
     classes = [c for c in np.unique(y) if (y == c).sum() > shots]
     if len(classes) < 2:
-        return {"accuracy": float("nan"), "min_similarity": 0.5, "episodes": 0}
+        return {"accuracy": float("nan"), "min_similarity": 0.5, "margin": 0.04, "episodes": 0}
     ways = min(ways, len(classes))
-    hits, total, own_sims = 0, 0, []
+    hits, total, own_sims, gaps = 0, 0, [], []
     for _ in range(episodes):
         chosen = rng.choice(classes, size=ways, replace=False)
         protos, query_sets = [], []
@@ -169,12 +169,19 @@ def few_shot(
         P = np.stack(protos)
         for way, query in enumerate(query_sets):
             sims = embeddings[query] @ P.T
-            hits += int((sims.argmax(axis=1) == way).sum())
+            correct = sims.argmax(axis=1) == way
+            hits += int(correct.sum())
             total += len(query)
             own_sims.extend(sims[:, way].tolist())
+            others = np.delete(sims, way, axis=1).max(axis=1)
+            gaps.extend((sims[:, way] - others)[correct].tolist())
+    # Accept a match only above the similarity 95% of true matches reach, and
+    # only if it beats the runner-up by the gap 90% of correct matches have.
+    margin = float(np.clip(np.percentile(gaps, 10), 0.002, 0.1)) if gaps else 0.04
     return {
         "accuracy": hits / max(total, 1),
         "min_similarity": float(np.percentile(own_sims, 5)),
+        "margin": margin,
         "episodes": episodes,
         "ways": ways,
         "shots": shots,
@@ -275,7 +282,7 @@ def evaluate(
             if accepted.any()
             else float("nan"),
         },
-        "teach": {**teach, "margin": ev.teach_margin},
+        "teach": teach,
         "perSign": [
             {
                 "sign": labels[c],

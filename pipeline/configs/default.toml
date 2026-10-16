@@ -61,4 +61,3 @@ confusion_pairs = 20
 few_shot_ways = 8
 few_shot_shots = 3
 few_shot_episodes = 1000
-teach_margin = 0.04

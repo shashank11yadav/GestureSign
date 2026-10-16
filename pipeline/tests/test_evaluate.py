@@ -101,3 +101,4 @@ def test_few_shot_on_separable_embeddings_is_perfect() -> None:
     result = ev.few_shot(emb.astype(np.float32), labels, rng, ways=5, shots=3, episodes=50)
     assert result["accuracy"] == pytest.approx(1.0)
     assert 0.0 < result["min_similarity"] <= 1.0
+    assert 0.002 <= result["margin"] <= 0.1
