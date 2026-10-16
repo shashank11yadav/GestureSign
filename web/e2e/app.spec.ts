@@ -16,7 +16,15 @@ test.describe('page', () => {
   }) => {
     await openReady(page);
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Sign to your camera');
-    await expect(page.getByTestId('untrained-notice')).toContainText('Untrained preview model');
+    // The notice is shown exactly while the deployed model is the untrained stub.
+    const meta = (await (await page.request.get('models/model-meta.json')).json()) as {
+      metrics: unknown;
+    };
+    if (meta.metrics === null) {
+      await expect(page.getByTestId('untrained-notice')).toContainText('Untrained preview model');
+    } else {
+      await expect(page.getByTestId('untrained-notice')).toHaveCount(0);
+    }
     const csp = await page
       .locator('meta[http-equiv="Content-Security-Policy"]')
       .getAttribute('content');
@@ -95,14 +103,14 @@ test.describe('model loading (review focus 4)', () => {
 });
 
 test.describe('recognise', () => {
-  test('a signed clip gives top-3 guesses and a history entry; the stub never names a sign', async ({
+  test('a signed clip gives a result, top-3 guesses and a history entry', async ({
     page,
     errors,
   }) => {
     await openReady(page);
     await injectClip(page, 0);
     const result = page.getByTestId('recognise-result');
-    await expect(result).toContainText('Not sure');
+    await expect(result).toContainText(/Not sure|You signed/);
     await expect(page.getByRole('list', { name: 'Top guesses' }).getByRole('listitem')).toHaveCount(
       3,
     );
