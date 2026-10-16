@@ -95,7 +95,7 @@ class Config:
     name: str = "default"
     seed: int = 42
     # Decided by the A1 benchmark; see pipeline/reports/bench.md.
-    feature_set: FeatureSet = "hands_pose"
+    feature_set: FeatureSet = "hands_pose_lips"
     fps: float = 30.0
     source_fps: float = 30.0
     min_frames: int = 8

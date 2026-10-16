@@ -1,0 +1,102 @@
+{
+  "thresholdFps": 15,
+  "decision": "hands_pose_lips",
+  "results": [
+    {
+      "featureSet": "hands_pose_lips",
+      "delegate": "GPU",
+      "fps": 21.4,
+      "frames": 214,
+      "seconds": 10,
+      "detectMsMean": 39.30887850227757,
+      "detectMsP95": 66.80000001192093,
+      "inferMsMean": 2.7523809543677737,
+      "inferRuns": 42,
+      "videoFps": 30,
+      "detected": {
+        "pose": 1,
+        "hands": 0.9906542056074766,
+        "face": 1
+      },
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+      "throttle": 1,
+      "runsFps": [
+        21.4
+      ]
+    },
+    {
+      "featureSet": "hands_pose_lips",
+      "delegate": "GPU",
+      "fps": 16.8,
+      "frames": 168,
+      "seconds": 10,
+      "detectMsMean": 54.05654761904762,
+      "detectMsP95": 67.89999997615814,
+      "inferMsMean": 10.684848489183368,
+      "inferRuns": 33,
+      "videoFps": 29.7,
+      "detected": {
+        "pose": 1,
+        "hands": 0.9880952380952381,
+        "face": 1
+      },
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+      "throttle": 4,
+      "runsFps": [
+        15.5,
+        16.8,
+        17.7
+      ]
+    },
+    {
+      "featureSet": "hands_pose",
+      "delegate": "GPU",
+      "fps": 23,
+      "frames": 230,
+      "seconds": 10,
+      "detectMsMean": 40.766521739959714,
+      "detectMsP95": 55.30000001192093,
+      "inferMsMean": 3.017391300719717,
+      "inferRuns": 46,
+      "videoFps": 29.9,
+      "detected": {
+        "pose": 0.9869565217391304,
+        "hands": 1,
+        "face": 0
+      },
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+      "throttle": 1,
+      "runsFps": [
+        23
+      ]
+    },
+    {
+      "featureSet": "hands_pose",
+      "delegate": "GPU",
+      "fps": 18.1,
+      "frames": 181,
+      "seconds": 10,
+      "detectMsMean": 48.236464086817115,
+      "detectMsP95": 63,
+      "inferMsMean": 11.22777777744664,
+      "inferRuns": 36,
+      "videoFps": 29.7,
+      "detected": {
+        "pose": 1,
+        "hands": 1,
+        "face": 0
+      },
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+      "throttle": 4,
+      "runsFps": [
+        17,
+        18.1,
+        18.7
+      ]
+    }
+  ]
+}

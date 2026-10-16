@@ -31,10 +31,11 @@ def test_stub_has_the_onnx_io_contract(stub_dir: Path) -> None:
     session = ort.InferenceSession(str(stub_dir / "model.onnx"))
     (inp,) = session.get_inputs()
     assert inp.name == "frames"
-    assert inp.shape == [1, "T", sequence_feature_dim("hands_pose")]
+    dim = sequence_feature_dim(Config().feature_set)
+    assert inp.shape == [1, "T", dim]
     assert [o.name for o in session.get_outputs()] == ["logits", "embedding"]
     for T in (8, 64):
-        x = np.random.default_rng(T).normal(size=(1, T, 299)).astype(np.float32)
+        x = np.random.default_rng(T).normal(size=(1, T, dim)).astype(np.float32)
         logits, emb = session.run(None, {"frames": x})
         assert logits.shape == (1, 250)
         assert emb.shape == (1, 128)
@@ -60,9 +61,9 @@ def test_stub_meta_marks_the_model_untrained(stub_dir: Path) -> None:
     assert meta["metrics"] is None
     assert meta["trainedOn"] is None
     assert meta["featureVersion"] == FEATURE_VERSION
-    assert meta["featureDim"] == 299
+    assert meta["featureDim"] == sequence_feature_dim(Config().feature_set)
     assert meta["classes"] == 250
-    assert meta["featureSet"] == "hands_pose"
+    assert meta["featureSet"] == Config().feature_set
     assert 0 < meta["calibration"]["notSureBelow"] <= 1
     assert -1 <= meta["teach"]["minSimilarity"] <= 1
 

@@ -2,7 +2,7 @@
 # prepare -> train (2 steps) -> evaluate -> export, in well under two minutes.
 name = "smoke"
 seed = 7
-feature_set = "hands_pose"
+feature_set = "hands_pose_lips"
 fps = 30
 source_fps = 30
 min_frames = 8

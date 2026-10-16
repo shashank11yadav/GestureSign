@@ -1,11 +1,11 @@
 {
- "version": "stub-e9b501f882",
+ "version": "stub-b7e7a62290",
  "featureVersion": 1,
- "featureSet": "hands_pose",
+ "featureSet": "hands_pose_lips",
  "fps": 30.0,
  "minFrames": 8,
  "maxFrames": 64,
- "featureDim": 299,
+ "featureDim": 460,
  "classes": 250,
  "embeddingDim": 128,
  "io": {
@@ -23,7 +23,7 @@
   "notSureBelow": 0.5
  },
  "teach": {
-  "minSimilarity": 0.9662,
-  "margin": 0.0087
+  "minSimilarity": 0.9808,
+  "margin": 0.0044
  }
 }

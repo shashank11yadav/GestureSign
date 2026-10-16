@@ -43,8 +43,9 @@ def test_rejects_sequences_longer_than_max_frames() -> None:
         small()(torch.randn(1, 17, 20))
 
 
-def test_default_size_is_within_budget() -> None:
-    model = SignModel(in_dim=299, num_classes=250, max_frames=64, cfg=ModelConfig())
+@pytest.mark.parametrize("in_dim", [299, 460])  # hands_pose, hands_pose_lips
+def test_default_size_is_within_budget(in_dim: int) -> None:
+    model = SignModel(in_dim=in_dim, num_classes=250, max_frames=64, cfg=ModelConfig())
     n = count_parameters(model)
     assert 1_000_000 <= n <= 3_000_000, n
 

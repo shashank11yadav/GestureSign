@@ -3,10 +3,11 @@
 name = "default"
 seed = 42
 
-# Decided by the A1 browser benchmark (pipeline/reports/bench.md): Holistic ran
-# below 15 fps under 4x CPU throttling, so the browser uses the Hand and Pose
-# landmarkers and the model sees hands and upper-body pose only.
-feature_set = "hands_pose"
+# Decided by the A1 browser benchmark (pipeline/reports/bench.md): the Holistic
+# landmarker sustained 16.8 fps (median of 3 runs) under 4x CPU throttling,
+# above the 15 fps bar, so the browser runs Holistic and the model sees hands,
+# upper-body pose and 40 lip points. "hands_pose" is the fallback.
+feature_set = "hands_pose_lips"
 
 # asl-signs is recorded at about 30 fps; the browser resamples webcam frames to
 # `fps` from their timestamps.
