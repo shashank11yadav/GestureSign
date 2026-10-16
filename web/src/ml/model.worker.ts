@@ -45,6 +45,7 @@ async function createSession(backend: Backend, bytes: Uint8Array, wasmPaths: str
   const created = await mod.InferenceSession.create(bytes, {
     executionProviders: [backend],
     graphOptimizationLevel: 'all',
+    logSeverityLevel: 3,
   });
   return { mod, created };
 }

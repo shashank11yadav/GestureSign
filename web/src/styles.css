@@ -1,0 +1,142 @@
+@import 'tailwindcss' source(none);
+@source "./";
+
+/* Colour tokens. Text/background pairs meet WCAG AA in both themes. */
+:root {
+  --paper: #f6f5f1;
+  --surface: #ffffff;
+  --surface-muted: #efede7;
+  --ink: #18181b;
+  --ink-muted: #56534d;
+  --line: #dedad1;
+  --accent: #4338ca;
+  --accent-ink: #ffffff;
+  --accent-soft: #eceafd;
+  --success: #166534;
+  --success-soft: #e3f6e8;
+  --warn: #8a4b0b;
+  --warn-soft: #fdf1d8;
+  --danger: #b42318;
+  --danger-soft: #fdecea;
+  --focus: #1d4ed8;
+  --stage: #0e1016;
+  --stage-ink: #e8e9ee;
+  --shadow: 0 1px 2px rgb(16 16 24 / 6%), 0 8px 24px rgb(16 16 24 / 6%);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #111114;
+    --surface: #1a1a1f;
+    --surface-muted: #25252c;
+    --ink: #ecebf0;
+    --ink-muted: #aaa8b4;
+    --line: #34343d;
+    --accent: #a5b4fc;
+    --accent-ink: #14143a;
+    --accent-soft: #262650;
+    --success: #86efac;
+    --success-soft: #15301f;
+    --warn: #fcd34d;
+    --warn-soft: #3a2c0d;
+    --danger: #fca5a5;
+    --danger-soft: #3b1717;
+    --focus: #93b4ff;
+    --stage: #08090d;
+    --shadow: none;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-stage: var(--stage);
+  --color-stage-ink: var(--stage-ink);
+  --shadow-card: var(--shadow);
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+html,
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -3rem;
+  z-index: 50;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+/* The camera view is shown as a mirror, which is what people expect of a selfie
+   camera. Landmarks are computed on the unmirrored frame. */
+.mirrored {
+  transform: scaleX(-1);
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.8);
+  }
+}
+
+.pulse-dot {
+  animation: pulse-dot 1.1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}

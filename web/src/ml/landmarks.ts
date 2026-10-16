@@ -47,6 +47,12 @@ export const POSE_CONNECTIONS: readonly (readonly [number, number])[] = [
   [11, 12], [11, 13], [13, 15], [12, 14], [14, 16], [7, 2], [2, 0], [0, 5], [5, 8],
 ]; // prettier-ignore
 
+/** Shoulder-to-hip lines, drawn fainter (hips are often out of a webcam's view). */
+export const TORSO_CONNECTIONS: readonly (readonly [number, number])[] = [
+  [11, 23],
+  [12, 24],
+];
+
 export type Frame = Float32Array;
 
 export function emptyFrame(): Frame {

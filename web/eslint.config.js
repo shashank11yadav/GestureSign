@@ -26,6 +26,11 @@ export default defineConfig([
     },
   },
   {
+    // Playwright fixtures call a parameter named `use`, which is not a React hook.
+    files: ['e2e/**/*.ts'],
+    rules: { 'react-hooks/rules-of-hooks': 'off' },
+  },
+  {
     files: ['scripts/**/*.mjs'],
     extends: [js.configs.recommended],
     languageOptions: { globals: globals.node },
