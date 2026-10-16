@@ -88,3 +88,22 @@ def test_left_handed_participant_signs_with_the_left_hand(tiny_dataset: Path) ->
 def test_synthetic_templates_are_distinct() -> None:
     names = [t.name for t in synthetic.sign_templates(24)]
     assert len(set(names)) == 24
+
+
+def test_reads_the_same_data_from_the_competition_zip(tiny_dataset: Path, tmp_path: Path) -> None:
+    import zipfile
+
+    archive = tmp_path / data.ZIP_NAME
+    with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as zf:
+        for path in sorted(tiny_dataset.rglob("*")):
+            if path.is_file():
+                zf.write(path, path.relative_to(tiny_dataset).as_posix())
+    for location in (archive, tmp_path):  # the zip itself, or the folder holding it
+        source = data.open_source(location)
+        assert isinstance(source, data.ZipSource)
+        table = data.read_train_csv(source)
+        pd.testing.assert_frame_equal(table, data.read_train_csv(tiny_dataset))
+        rel = table["path"].iloc[0]
+        np.testing.assert_array_equal(
+            data.load_sequence(source, rel), data.load_landmarks(tiny_dataset / rel)
+        )

@@ -34,7 +34,9 @@ ConfigOpt = Annotated[Path, typer.Option("--config", "-c", help="run configurati
 DataDirOpt = Annotated[
     Path | None,
     typer.Option(
-        "--data-dir", help="asl-signs folder [default: $DATA_DIR or ../_datasets/asl-signs]"
+        "--data-dir",
+        help="asl-signs folder, asl-signs.zip, or a folder holding it "
+        "[default: $DATA_DIR or ../_datasets/asl-signs]",
     ),
 ]
 CacheDirOpt = Annotated[
@@ -53,7 +55,11 @@ def _data_dir(value: Path | None) -> Path:
 
 
 def _cache_dir(value: Path | None, data_dir: Path) -> Path:
-    return value if value is not None else data_dir / "gesturesign-cache"
+    if value is not None:
+        return value
+    # Next to the data, whether --data-dir names a folder or the zip itself.
+    base = data_dir.parent if data_dir.is_file() else data_dir
+    return base / "gesturesign-cache"
 
 
 def _run_dir(value: Path | None, cfg: Config) -> Path:
@@ -205,6 +211,9 @@ def export_replay(
     source: Annotated[str, typer.Option(help="synthetic or asl-signs")] = "synthetic",
     data_dir: DataDirOpt = None,
     signs: Annotated[str | None, typer.Option(help="comma-separated signs (asl-signs)")] = None,
+    limit: Annotated[
+        int | None, typer.Option(help="read at most this many candidate clips")
+    ] = None,
     out: Annotated[Path, typer.Option(help="output file")] = paths.REPLAY_PATH,
 ) -> None:
     """Write the Replay mode's landmark clips (synthetic placeholders by default)."""
@@ -217,7 +226,7 @@ def export_replay(
         wanted = [s.strip() for s in signs.split(",")] if signs else None
         if wanted is None:
             wanted = shipped_signs(paths.WEB_MODELS_DIR / "labels.json")
-        clips = asl_signs_clips(cfg, _data_dir(data_dir), wanted)
+        clips = asl_signs_clips(cfg, _data_dir(data_dir), wanted, limit=limit)
         if not clips:
             raise typer.BadParameter("no held-out clips matched; check the data dir and signs")
     else:
@@ -231,10 +240,15 @@ def replay_clips(
     config: ConfigOpt = paths.DEFAULT_CONFIG,
     data_dir: DataDirOpt = None,
     signs: Annotated[str | None, typer.Option(help="comma-separated signs to use")] = None,
+    limit: Annotated[
+        int | None, typer.Option(help="read at most this many candidate clips")
+    ] = None,
     out: Annotated[Path, typer.Option(help="output file")] = paths.REPLAY_PATH,
 ) -> None:
     """Bundle ~6 held-out-signer clips of shipped signs for Replay (run after export)."""
-    export_replay(config=config, source="asl-signs", data_dir=data_dir, signs=signs, out=out)
+    export_replay(
+        config=config, source="asl-signs", data_dir=data_dir, signs=signs, limit=limit, out=out
+    )
 
 
 @app.command()

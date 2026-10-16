@@ -91,3 +91,16 @@ def test_dataset_items_and_padding(cache_dir: Path) -> None:
         assert int(mask[i].sum()) == max(1, x.shape[0])
         assert int(labels[i]) == y
     assert torch.isfinite(frames).all()
+
+
+def test_prepare_reads_straight_from_the_zip(dataset_dir: Path, tmp_path: Path) -> None:
+    import zipfile
+
+    archive = tmp_path / "asl-signs.zip"
+    with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as zf:
+        for path in sorted(dataset_dir.rglob("*")):
+            if path.is_file():
+                zf.write(path, path.relative_to(dataset_dir).as_posix())
+    prepare(cfg(), archive, tmp_path / "cache", workers=2, limit=3, log=lambda _: None)
+    cache = LandmarkCache.load(tmp_path / "cache")
+    assert len(cache) == 3 * len(PARTICIPANTS)

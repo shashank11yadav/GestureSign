@@ -23,7 +23,7 @@ import numpy as np
 from gesturesign import landmarks as lm
 from gesturesign import synthetic
 from gesturesign.config import Config
-from gesturesign.data import load_landmarks, read_train_csv
+from gesturesign.data import load_sequence, open_source, read_train_csv
 from gesturesign.resample import fit_length, resample
 from gesturesign.signs import display_name, humanise_synthetic
 from gesturesign.types import Frames
@@ -90,18 +90,21 @@ def asl_signs_clips(
     n: int = 6,
     *,
     seed: int = REPLAY_SEED,
+    limit: int | None = None,
 ) -> list[dict[str, Any]]:
     """Up to ``n`` clips, one per sign, from the held-out test participants.
 
     Prefers clips with enough frames to look like a sign and with the signing
     hand visible in most of them, and spreads the picks across participants.
+    ``limit`` caps how many candidate clips are read.
     """
-    table = read_train_csv(data_dir)
+    source = open_source(data_dir)
+    table = read_train_csv(source)
     table = table[table["participant_id"].isin(cfg.split.test_participants)]
     if signs is not None:
         table = table[table["sign"].isin(signs)]
     rng = np.random.default_rng(seed)
-    order = rng.permutation(len(table))
+    order = rng.permutation(len(table))[: limit if limit else None]
     points = replay_points(cfg)
     clips: list[dict[str, Any]] = []
     used_signs: set[str] = set()
@@ -113,7 +116,7 @@ def asl_signs_clips(
         sign, pid = str(row["sign"]), int(row["participant_id"])
         if sign in used_signs or per_participant.get(pid, 0) >= -(-n // 2):
             continue
-        frames = load_landmarks(data_dir / str(row["path"]))
+        frames = load_sequence(source, str(row["path"]))
         frames = fit_length(resample(frames, cfg.source_fps, cfg.fps), cfg.max_frames)
         hands = np.isfinite(frames[:, [lm.LEFT_HAND_START, lm.RIGHT_HAND_START], 0]).any(axis=1)
         if frames.shape[0] < 2 * cfg.min_frames or hands.mean() < 0.6:

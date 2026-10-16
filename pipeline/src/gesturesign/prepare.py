@@ -28,7 +28,7 @@ import pandas as pd
 
 from gesturesign import landmarks as lm
 from gesturesign.config import Config
-from gesturesign.data import DataError, load_landmarks, read_train_csv
+from gesturesign.data import DataError, load_sequence, open_source, read_train_csv
 from gesturesign.resample import fit_length, resample
 from gesturesign.types import Frames
 
@@ -84,10 +84,11 @@ def _process_shard(
     job: tuple[Path, Path, list[tuple[str, int, int, int]], float, float, int],
 ) -> int:
     data_dir, out_path, rows, src_fps, fps, keep_frames = job
+    source = open_source(data_dir)  # one zip handle per worker process
     points: list[npt.NDArray[np.float16]] = []
     lengths, labels, participants, sequences = [], [], [], []
     for rel, label, participant, sequence in rows:
-        frames = load_landmarks(data_dir / rel)
+        frames = load_sequence(source, rel)
         frames = fit_length(resample(frames, src_fps, fps), keep_frames)
         if frames.shape[0] == 0:
             continue
