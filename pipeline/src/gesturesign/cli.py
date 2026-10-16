@@ -207,19 +207,34 @@ def export_replay(
     signs: Annotated[str | None, typer.Option(help="comma-separated signs (asl-signs)")] = None,
     out: Annotated[Path, typer.Option(help="output file")] = paths.REPLAY_PATH,
 ) -> None:
-    """Write the Replay mode's landmark clips."""
-    from gesturesign.replay import asl_signs_clips, synthetic_clips, write_replay
+    """Write the Replay mode's landmark clips (synthetic placeholders by default)."""
+    from gesturesign.replay import asl_signs_clips, shipped_signs, synthetic_clips, write_replay
 
     cfg = load_config(config)
     if source == "synthetic":
         clips = synthetic_clips(cfg)
     elif source == "asl-signs":
         wanted = [s.strip() for s in signs.split(",")] if signs else None
+        if wanted is None:
+            wanted = shipped_signs(paths.WEB_MODELS_DIR / "labels.json")
         clips = asl_signs_clips(cfg, _data_dir(data_dir), wanted)
+        if not clips:
+            raise typer.BadParameter("no held-out clips matched; check the data dir and signs")
     else:
         raise typer.BadParameter("source must be 'synthetic' or 'asl-signs'")
     path = write_replay(cfg, clips, source, out)
-    _echo(f"wrote {len(clips)} clips to {path} ({path.stat().st_size / 1024:.0f} KiB)")
+    _echo(f"wrote {len(clips)} {source} clips to {path} ({path.stat().st_size / 1024:.0f} KiB)")
+
+
+@app.command("replay-clips")
+def replay_clips(
+    config: ConfigOpt = paths.DEFAULT_CONFIG,
+    data_dir: DataDirOpt = None,
+    signs: Annotated[str | None, typer.Option(help="comma-separated signs to use")] = None,
+    out: Annotated[Path, typer.Option(help="output file")] = paths.REPLAY_PATH,
+) -> None:
+    """Bundle ~6 held-out-signer clips of shipped signs for Replay (run after export)."""
+    export_replay(config=config, source="asl-signs", data_dir=data_dir, signs=signs, out=out)
 
 
 @app.command()
