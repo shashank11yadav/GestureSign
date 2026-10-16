@@ -86,6 +86,13 @@ def _frame_case(name: str, frame: Frames, feature_set: FeatureSet, note: str) ->
     }
 
 
+def _stretch_y(frames: Frames, height_ratio: float) -> Frames:
+    """Normalised y of the same scene in an image ``height_ratio`` times as tall (per width)."""
+    out = frames.copy()
+    out[..., 1] = 0.5 + (frames[..., 1] - 0.5) / height_ratio
+    return out
+
+
 def build_fixture(cfg: Config) -> dict[str, Any]:
     rng = np.random.default_rng(99)
     templates = synthetic.sign_templates(8, seed=99)
@@ -109,6 +116,13 @@ def build_fixture(cfg: Config) -> dict[str, Any]:
             30,
             cfg,
             "the same clip flipped horizontally; must equal two-hands",
+        ),
+        _sequence_case(
+            "two-hands-landscape",
+            _stretch_y(base, 0.6),
+            30,
+            cfg,
+            "the same clip seen by a camera of another aspect ratio; must equal two-hands",
         ),
         _sequence_case("resample-25fps", base, 25, cfg, "25 fps source resampled to 30"),
         _sequence_case("resample-24fps-webcam", partial, 24, cfg, "slow webcam with dropouts"),

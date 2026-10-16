@@ -158,3 +158,43 @@ def test_tie_break_keeps_mirrored_two_handed_clips_identical() -> None:
     a = ft.sequence_features(frames, "hands_pose")
     b = ft.sequence_features(ft.mirror_landmarks(frames), "hands_pose")
     np.testing.assert_allclose(a, b, atol=1e-5)
+
+
+def _with_face(frames: np.ndarray, eye_mouth: float, ear_ear: float) -> None:
+    """Pose eyes, mouth and ears around (0.5, 0.3) with the given spans."""
+    for idx, (x, y) in {
+        2: (0.52, 0.3), 5: (0.48, 0.3),
+        9: (0.51, 0.3 + eye_mouth), 10: (0.49, 0.3 + eye_mouth),
+        7: (0.5 + ear_ear / 2, 0.31), 8: (0.5 - ear_ear / 2, 0.31),
+    }.items():  # fmt: skip
+        frames[:, lm.pose(idx), :2] = (x, y)
+        frames[:, lm.pose(idx), 2] = 0.0
+
+
+def test_vertical_scale_follows_the_face_proportion() -> None:
+    frames = blank_frames(2)
+    put_shoulders(frames, (0.6, 0.5), (0.4, 0.5))
+    _with_face(frames, eye_mouth=0.086, ear_ear=0.1)  # twice the reference ratio
+    anchor = ft.compute_anchor(frames)
+    assert anchor.scale == pytest.approx(0.2)
+    assert anchor.y_scale == pytest.approx(0.2 * 0.86 / ft.FACE_RATIO_REF)
+
+
+def test_camera_aspect_ratio_cancels_out() -> None:
+    """The same scene in a portrait and a landscape image gives the same features."""
+    portrait = full_body_frames(10, seed=4)
+    _with_face(portrait, eye_mouth=0.043, ear_ear=0.1)
+    landscape = portrait.copy()
+    # Same pixels seen through a frame whose height is 0.55x as tall relative to its width:
+    # normalised y stretches by 1 / 0.55 about the image centre.
+    landscape[..., 1] = 0.5 + (portrait[..., 1] - 0.5) / 0.55
+    a = ft.sequence_features(portrait, "hands_pose")
+    b = ft.sequence_features(landscape, "hands_pose")
+    np.testing.assert_allclose(a, b, atol=1e-4)
+
+
+def test_no_face_points_means_no_vertical_correction() -> None:
+    frames = blank_frames(1)
+    put_shoulders(frames, (0.6, 0.5), (0.4, 0.5))
+    anchor = ft.compute_anchor(frames)
+    assert anchor.y_scale == anchor.scale

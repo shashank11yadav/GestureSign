@@ -3,8 +3,14 @@
 Per frame:
 
 1. Pick the hands, the upper-body pose and, for ``hands_pose_lips``, 40 lip points.
-2. Centre on the shoulder midpoint and divide by the shoulder width, using one
-   anchor per sequence (the median over frames where both shoulders are seen).
+2. Centre on the shoulder midpoint and divide x by the shoulder width, using
+   one anchor per sequence (the median over frames where both shoulders are
+   seen). Divide y by the shoulder width times the face's vertical proportion
+   (eye-to-mouth over ear-to-ear, from pose points) relative to its typical
+   value in the training data. MediaPipe normalises x by image width and y by
+   image height, so without this a landscape webcam would stretch every
+   vertical distance relative to the portrait phone videos of asl-signs; the
+   face proportion measures that stretch and cancels it.
 3. Canonicalise handedness: when the left hand is the signing hand (seen in
    more frames; on a tie, moving more), mirror x and swap left and right so the
    model always sees the signing hand in the "dominant" slot. A mirrored webcam
@@ -34,7 +40,7 @@ from gesturesign.types import Frames
 
 FeatureSet = Literal["hands_pose", "hands_pose_lips"]
 FEATURE_SETS: tuple[FeatureSet, ...] = get_args(FeatureSet)
-FEATURE_VERSION = 1
+FEATURE_VERSION = 2
 
 
 @dataclass(frozen=True)
@@ -42,12 +48,17 @@ class Anchor:
     cx: float
     cy: float
     scale: float
+    y_scale: float
 
 
 # Used when no frame has both shoulders: image centre and a typical shoulder
 # width for someone framed from the chest up.
-DEFAULT_ANCHOR = Anchor(0.5, 0.5, 0.25)
+DEFAULT_ANCHOR = Anchor(0.5, 0.5, 0.25, 0.25)
 MIN_SCALE = 1e-3
+# Median eye-to-mouth / ear-to-ear distance in asl-signs' normalised
+# coordinates (63 clips from all 21 signers; spread about 8%).
+FACE_RATIO_REF = 0.43
+FACE_RATIO_RANGE = (0.2, 1.2)
 
 
 @dataclass(frozen=True)
@@ -97,20 +108,39 @@ def sequence_feature_dim(feature_set: FeatureSet) -> int:
     return feature_layout(feature_set).sequence_dim
 
 
+def face_ratio(frames: Frames) -> float | None:
+    """Median eye-to-mouth over ear-to-ear distance (pose points), or None if never seen."""
+    p = frames[:, :, :2].astype(np.float64)
+    eyes = (p[:, lm.pose(2)] + p[:, lm.pose(5)]) / 2
+    mouth = (p[:, lm.pose(9)] + p[:, lm.pose(10)]) / 2
+    ears = p[:, lm.pose(7)] - p[:, lm.pose(8)]
+    vertical = np.hypot(eyes[:, 0] - mouth[:, 0], eyes[:, 1] - mouth[:, 1])
+    horizontal = np.hypot(ears[:, 0], ears[:, 1])
+    valid = np.isfinite(vertical) & np.isfinite(horizontal) & (horizontal > 1e-4)
+    if not valid.any():
+        return None
+    ratio = float(np.median(vertical[valid] / horizontal[valid]))
+    return min(max(ratio, FACE_RATIO_RANGE[0]), FACE_RATIO_RANGE[1])
+
+
 def compute_anchor(frames: Frames) -> Anchor:
-    """Median shoulder midpoint and width over the frames that show both shoulders."""
+    """Shoulder midpoint and width (medians over frames showing both shoulders) and y scale."""
     left = frames[:, lm.pose(lm.POSE_LEFT_SHOULDER), :2].astype(np.float64)
     right = frames[:, lm.pose(lm.POSE_RIGHT_SHOULDER), :2].astype(np.float64)
     valid = np.isfinite(left).all(axis=1) & np.isfinite(right).all(axis=1)
-    if not valid.any():
-        return DEFAULT_ANCHOR
-    left, right = left[valid], right[valid]
-    centre = (left + right) / 2
-    width = np.hypot(left[:, 0] - right[:, 0], left[:, 1] - right[:, 1])
-    scale = float(np.median(width))
-    if not scale > MIN_SCALE:
-        scale = DEFAULT_ANCHOR.scale
-    return Anchor(float(np.median(centre[:, 0])), float(np.median(centre[:, 1])), scale)
+    if valid.any():
+        left, right = left[valid], right[valid]
+        centre = (left + right) / 2
+        width = np.hypot(left[:, 0] - right[:, 0], left[:, 1] - right[:, 1])
+        scale = float(np.median(width))
+        if not scale > MIN_SCALE:
+            scale = DEFAULT_ANCHOR.scale
+        cx, cy = float(np.median(centre[:, 0])), float(np.median(centre[:, 1]))
+    else:
+        cx, cy, scale = DEFAULT_ANCHOR.cx, DEFAULT_ANCHOR.cy, DEFAULT_ANCHOR.scale
+    ratio = face_ratio(frames)
+    y_scale = scale * ratio / FACE_RATIO_REF if ratio is not None else scale
+    return Anchor(cx, cy, scale, y_scale)
 
 
 def _part_present(frames: Frames, start: int, size: int) -> npt.NDArray[np.bool_]:
@@ -168,10 +198,11 @@ def _frames_features(
     dominant, other, body = _indices(feature_set, mirror)
     xy = frames[:, :, :2].astype(np.float64)
     centre = np.array([anchor.cx, anchor.cy])
+    scale = np.array([anchor.scale, anchor.y_scale])
     sign = np.array([-1.0 if mirror else 1.0, 1.0])
 
     def norm(idx: list[int]) -> npt.NDArray[np.float64]:
-        out: npt.NDArray[np.float64] = (xy[:, idx] - centre) / anchor.scale * sign
+        out: npt.NDArray[np.float64] = (xy[:, idx] - centre) / scale * sign
         return out
 
     dom, oth, bod = norm(dominant), norm(other), norm(body)

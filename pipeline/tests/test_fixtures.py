@@ -44,11 +44,13 @@ def test_case_matches(name: str) -> None:
     np.testing.assert_allclose(got, expected, atol=fixture["tolerance"], rtol=0)
 
 
-def test_mirrored_case_equals_the_original() -> None:
+@pytest.mark.parametrize("variant", ["two-hands-mirrored", "two-hands-landscape"])
+def test_mirrored_and_reframed_cases_equal_the_original(variant: str) -> None:
     cases = {c["name"]: c for c in load()["cases"]}
     a = np.asarray(cases["two-hands"]["expected"]["features"])
-    b = np.asarray(cases["two-hands-mirrored"]["expected"]["features"])
-    np.testing.assert_allclose(a, b, atol=1e-4)
+    b = np.asarray(cases[variant]["expected"]["features"])
+    # Shoulders are not perfectly level, so the reframing moves the width a little.
+    np.testing.assert_allclose(a, b, atol=1e-3)
 
 
 def test_fixture_covers_resampling_and_squeezing() -> None:

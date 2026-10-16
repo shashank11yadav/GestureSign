@@ -24,16 +24,22 @@ import {
 } from './landmarks';
 
 export type FeatureSet = 'hands_pose' | 'hands_pose_lips';
-export const FEATURE_VERSION = 1;
+export const FEATURE_VERSION = 2;
 
 export interface Anchor {
   cx: number;
   cy: number;
   scale: number;
+  /** Divisor for y: the shoulder width times the face's vertical proportion (see features.py). */
+  yScale: number;
 }
 
-export const DEFAULT_ANCHOR: Readonly<Anchor> = { cx: 0.5, cy: 0.5, scale: 0.25 };
+export const DEFAULT_ANCHOR: Readonly<Anchor> = { cx: 0.5, cy: 0.5, scale: 0.25, yScale: 0.25 };
 const MIN_SCALE = 1e-3;
+/** Median eye-to-mouth / ear-to-ear distance in asl-signs (normalised coordinates). */
+export const FACE_RATIO_REF = 0.43;
+const FACE_RATIO_MIN = 0.2;
+const FACE_RATIO_MAX = 1.2;
 
 export interface FeatureLayout {
   frameDim: number;
@@ -61,7 +67,30 @@ function median(values: number[]): number {
   return ((sorted[mid - 1] ?? Number.NaN) + (sorted[mid] ?? Number.NaN)) / 2;
 }
 
-/** Median shoulder midpoint and width over the frames that show both shoulders. */
+/**
+ * Median eye-to-mouth over ear-to-ear distance from pose points, or null if never seen.
+ * MediaPipe normalises x by image width and y by height, so this ratio measures
+ * how the camera's aspect ratio stretches vertical distances.
+ */
+export function faceRatio(frames: readonly Frame[]): number | null {
+  const ratios: number[] = [];
+  const p = (i: number) => POSE_START + i;
+  for (const f of frames) {
+    const eyeX = (x(f, p(2)) + x(f, p(5))) / 2;
+    const eyeY = (y(f, p(2)) + y(f, p(5))) / 2;
+    const mouthX = (x(f, p(9)) + x(f, p(10))) / 2;
+    const mouthY = (y(f, p(9)) + y(f, p(10))) / 2;
+    const vertical = Math.hypot(eyeX - mouthX, eyeY - mouthY);
+    const horizontal = Math.hypot(x(f, p(7)) - x(f, p(8)), y(f, p(7)) - y(f, p(8)));
+    if (Number.isFinite(vertical) && Number.isFinite(horizontal) && horizontal > 1e-4) {
+      ratios.push(vertical / horizontal);
+    }
+  }
+  if (ratios.length === 0) return null;
+  return Math.min(Math.max(median(ratios), FACE_RATIO_MIN), FACE_RATIO_MAX);
+}
+
+/** Shoulder midpoint and width (medians over frames showing both shoulders) and y scale. */
 export function computeAnchor(frames: readonly Frame[]): Anchor {
   const cxs: number[] = [];
   const cys: number[] = [];
@@ -78,10 +107,17 @@ export function computeAnchor(frames: readonly Frame[]): Anchor {
     cys.push((ly + ry) / 2);
     widths.push(Math.hypot(lx - rx, ly - ry));
   }
-  if (cxs.length === 0) return { ...DEFAULT_ANCHOR };
-  let scale = median(widths);
-  if (!(scale > MIN_SCALE)) scale = DEFAULT_ANCHOR.scale;
-  return { cx: median(cxs), cy: median(cys), scale };
+  let cx = DEFAULT_ANCHOR.cx;
+  let cy = DEFAULT_ANCHOR.cy;
+  let scale = DEFAULT_ANCHOR.scale;
+  if (cxs.length > 0) {
+    scale = median(widths);
+    if (!(scale > MIN_SCALE)) scale = DEFAULT_ANCHOR.scale;
+    cx = median(cxs);
+    cy = median(cys);
+  }
+  const ratio = faceRatio(frames);
+  return { cx, cy, scale, yScale: ratio === null ? scale : (scale * ratio) / FACE_RATIO_REF };
 }
 
 function handSeen(f: Frame, start: number): boolean {
@@ -157,7 +193,7 @@ function frameBlock(
   let p = 0;
   for (const point of [...idx.dominant, ...idx.other, ...idx.body]) {
     positions[p++] = ((x(f, point) - anchor.cx) / anchor.scale) * sign;
-    positions[p++] = (y(f, point) - anchor.cy) / anchor.scale;
+    positions[p++] = (y(f, point) - anchor.cy) / anchor.yScale;
   }
   const features = new Float64Array(layout.frameDim);
   features.set(positions, 0);
