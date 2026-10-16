@@ -1,0 +1,2005 @@
+{
+ "version": 1,
+ "signs": [
+  {
+   "index": 0,
+   "sign": "TV",
+   "label": "TV",
+   "lookup": "TV",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 1,
+   "sign": "after",
+   "label": "after",
+   "lookup": "after",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 2,
+   "sign": "airplane",
+   "label": "airplane",
+   "lookup": "airplane",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 3,
+   "sign": "all",
+   "label": "all",
+   "lookup": "all",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 4,
+   "sign": "alligator",
+   "label": "alligator",
+   "lookup": "alligator",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 5,
+   "sign": "animal",
+   "label": "animal",
+   "lookup": "animal",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 6,
+   "sign": "another",
+   "label": "another",
+   "lookup": "another",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 7,
+   "sign": "any",
+   "label": "any",
+   "lookup": "any",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 8,
+   "sign": "apple",
+   "label": "apple",
+   "lookup": "apple",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 9,
+   "sign": "arm",
+   "label": "arm",
+   "lookup": "arm",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 10,
+   "sign": "aunt",
+   "label": "aunt",
+   "lookup": "aunt",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 11,
+   "sign": "awake",
+   "label": "awake",
+   "lookup": "awake",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 12,
+   "sign": "backyard",
+   "label": "backyard",
+   "lookup": "backyard",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 13,
+   "sign": "bad",
+   "label": "bad",
+   "lookup": "bad",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 14,
+   "sign": "balloon",
+   "label": "balloon",
+   "lookup": "balloon",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 15,
+   "sign": "bath",
+   "label": "bath",
+   "lookup": "bath",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 16,
+   "sign": "because",
+   "label": "because",
+   "lookup": "because",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 17,
+   "sign": "bed",
+   "label": "bed",
+   "lookup": "bed",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 18,
+   "sign": "bedroom",
+   "label": "bedroom",
+   "lookup": "bedroom",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 19,
+   "sign": "bee",
+   "label": "bee",
+   "lookup": "bee",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 20,
+   "sign": "before",
+   "label": "before",
+   "lookup": "before",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 21,
+   "sign": "beside",
+   "label": "beside",
+   "lookup": "beside",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 22,
+   "sign": "better",
+   "label": "better",
+   "lookup": "better",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 23,
+   "sign": "bird",
+   "label": "bird",
+   "lookup": "bird",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 24,
+   "sign": "black",
+   "label": "black",
+   "lookup": "black",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 25,
+   "sign": "blow",
+   "label": "blow",
+   "lookup": "blow",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 26,
+   "sign": "blue",
+   "label": "blue",
+   "lookup": "blue",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 27,
+   "sign": "boat",
+   "label": "boat",
+   "lookup": "boat",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 28,
+   "sign": "book",
+   "label": "book",
+   "lookup": "book",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 29,
+   "sign": "boy",
+   "label": "boy",
+   "lookup": "boy",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 30,
+   "sign": "brother",
+   "label": "brother",
+   "lookup": "brother",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 31,
+   "sign": "brown",
+   "label": "brown",
+   "lookup": "brown",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 32,
+   "sign": "bug",
+   "label": "bug",
+   "lookup": "bug",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 33,
+   "sign": "bye",
+   "label": "bye",
+   "lookup": "bye",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 34,
+   "sign": "callonphone",
+   "label": "call (on phone)",
+   "lookup": "call",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 35,
+   "sign": "can",
+   "label": "can",
+   "lookup": "can",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 36,
+   "sign": "car",
+   "label": "car",
+   "lookup": "car",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 37,
+   "sign": "carrot",
+   "label": "carrot",
+   "lookup": "carrot",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 38,
+   "sign": "cat",
+   "label": "cat",
+   "lookup": "cat",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 39,
+   "sign": "cereal",
+   "label": "cereal",
+   "lookup": "cereal",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 40,
+   "sign": "chair",
+   "label": "chair",
+   "lookup": "chair",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 41,
+   "sign": "cheek",
+   "label": "cheek",
+   "lookup": "cheek",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 42,
+   "sign": "child",
+   "label": "child",
+   "lookup": "child",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 43,
+   "sign": "chin",
+   "label": "chin",
+   "lookup": "chin",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 44,
+   "sign": "chocolate",
+   "label": "chocolate",
+   "lookup": "chocolate",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 45,
+   "sign": "clean",
+   "label": "clean",
+   "lookup": "clean",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 46,
+   "sign": "close",
+   "label": "close",
+   "lookup": "close",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 47,
+   "sign": "closet",
+   "label": "closet",
+   "lookup": "closet",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 48,
+   "sign": "cloud",
+   "label": "cloud",
+   "lookup": "cloud",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 49,
+   "sign": "clown",
+   "label": "clown",
+   "lookup": "clown",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 50,
+   "sign": "cow",
+   "label": "cow",
+   "lookup": "cow",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 51,
+   "sign": "cowboy",
+   "label": "cowboy",
+   "lookup": "cowboy",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 52,
+   "sign": "cry",
+   "label": "cry",
+   "lookup": "cry",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 53,
+   "sign": "cut",
+   "label": "cut",
+   "lookup": "cut",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 54,
+   "sign": "cute",
+   "label": "cute",
+   "lookup": "cute",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 55,
+   "sign": "dad",
+   "label": "dad",
+   "lookup": "dad",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 56,
+   "sign": "dance",
+   "label": "dance",
+   "lookup": "dance",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 57,
+   "sign": "dirty",
+   "label": "dirty",
+   "lookup": "dirty",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 58,
+   "sign": "dog",
+   "label": "dog",
+   "lookup": "dog",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 59,
+   "sign": "doll",
+   "label": "doll",
+   "lookup": "doll",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 60,
+   "sign": "donkey",
+   "label": "donkey",
+   "lookup": "donkey",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 61,
+   "sign": "down",
+   "label": "down",
+   "lookup": "down",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 62,
+   "sign": "drawer",
+   "label": "drawer",
+   "lookup": "drawer",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 63,
+   "sign": "drink",
+   "label": "drink",
+   "lookup": "drink",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 64,
+   "sign": "drop",
+   "label": "drop",
+   "lookup": "drop",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 65,
+   "sign": "dry",
+   "label": "dry",
+   "lookup": "dry",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 66,
+   "sign": "dryer",
+   "label": "dryer",
+   "lookup": "dryer",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 67,
+   "sign": "duck",
+   "label": "duck",
+   "lookup": "duck",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 68,
+   "sign": "ear",
+   "label": "ear",
+   "lookup": "ear",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 69,
+   "sign": "elephant",
+   "label": "elephant",
+   "lookup": "elephant",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 70,
+   "sign": "empty",
+   "label": "empty",
+   "lookup": "empty",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 71,
+   "sign": "every",
+   "label": "every",
+   "lookup": "every",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 72,
+   "sign": "eye",
+   "label": "eye",
+   "lookup": "eye",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 73,
+   "sign": "face",
+   "label": "face",
+   "lookup": "face",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 74,
+   "sign": "fall",
+   "label": "fall",
+   "lookup": "fall",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 75,
+   "sign": "farm",
+   "label": "farm",
+   "lookup": "farm",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 76,
+   "sign": "fast",
+   "label": "fast",
+   "lookup": "fast",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 77,
+   "sign": "feet",
+   "label": "feet",
+   "lookup": "feet",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 78,
+   "sign": "find",
+   "label": "find",
+   "lookup": "find",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 79,
+   "sign": "fine",
+   "label": "fine",
+   "lookup": "fine",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 80,
+   "sign": "finger",
+   "label": "finger",
+   "lookup": "finger",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 81,
+   "sign": "finish",
+   "label": "finish",
+   "lookup": "finish",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 82,
+   "sign": "fireman",
+   "label": "fireman",
+   "lookup": "fireman",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 83,
+   "sign": "first",
+   "label": "first",
+   "lookup": "first",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 84,
+   "sign": "fish",
+   "label": "fish",
+   "lookup": "fish",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 85,
+   "sign": "flag",
+   "label": "flag",
+   "lookup": "flag",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 86,
+   "sign": "flower",
+   "label": "flower",
+   "lookup": "flower",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 87,
+   "sign": "food",
+   "label": "food",
+   "lookup": "food",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 88,
+   "sign": "for",
+   "label": "for",
+   "lookup": "for",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 89,
+   "sign": "frenchfries",
+   "label": "french fries",
+   "lookup": "french fries",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 90,
+   "sign": "frog",
+   "label": "frog",
+   "lookup": "frog",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 91,
+   "sign": "garbage",
+   "label": "garbage",
+   "lookup": "garbage",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 92,
+   "sign": "gift",
+   "label": "gift",
+   "lookup": "gift",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 93,
+   "sign": "giraffe",
+   "label": "giraffe",
+   "lookup": "giraffe",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 94,
+   "sign": "girl",
+   "label": "girl",
+   "lookup": "girl",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 95,
+   "sign": "give",
+   "label": "give",
+   "lookup": "give",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 96,
+   "sign": "glasswindow",
+   "label": "glass / window",
+   "lookup": "window",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 97,
+   "sign": "go",
+   "label": "go",
+   "lookup": "go",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 98,
+   "sign": "goose",
+   "label": "goose",
+   "lookup": "goose",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 99,
+   "sign": "grandma",
+   "label": "grandma",
+   "lookup": "grandma",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 100,
+   "sign": "grandpa",
+   "label": "grandpa",
+   "lookup": "grandpa",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 101,
+   "sign": "grass",
+   "label": "grass",
+   "lookup": "grass",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 102,
+   "sign": "green",
+   "label": "green",
+   "lookup": "green",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 103,
+   "sign": "gum",
+   "label": "gum",
+   "lookup": "gum",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 104,
+   "sign": "hair",
+   "label": "hair",
+   "lookup": "hair",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 105,
+   "sign": "happy",
+   "label": "happy",
+   "lookup": "happy",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 106,
+   "sign": "hat",
+   "label": "hat",
+   "lookup": "hat",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 107,
+   "sign": "hate",
+   "label": "hate",
+   "lookup": "hate",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 108,
+   "sign": "have",
+   "label": "have",
+   "lookup": "have",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 109,
+   "sign": "haveto",
+   "label": "have to",
+   "lookup": "have to",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 110,
+   "sign": "head",
+   "label": "head",
+   "lookup": "head",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 111,
+   "sign": "hear",
+   "label": "hear",
+   "lookup": "hear",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 112,
+   "sign": "helicopter",
+   "label": "helicopter",
+   "lookup": "helicopter",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 113,
+   "sign": "hello",
+   "label": "hello",
+   "lookup": "hello",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 114,
+   "sign": "hen",
+   "label": "hen",
+   "lookup": "hen",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 115,
+   "sign": "hesheit",
+   "label": "he / she / it",
+   "lookup": "he",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 116,
+   "sign": "hide",
+   "label": "hide",
+   "lookup": "hide",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 117,
+   "sign": "high",
+   "label": "high",
+   "lookup": "high",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 118,
+   "sign": "home",
+   "label": "home",
+   "lookup": "home",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 119,
+   "sign": "horse",
+   "label": "horse",
+   "lookup": "horse",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 120,
+   "sign": "hot",
+   "label": "hot",
+   "lookup": "hot",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 121,
+   "sign": "hungry",
+   "label": "hungry",
+   "lookup": "hungry",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 122,
+   "sign": "icecream",
+   "label": "ice cream",
+   "lookup": "ice cream",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 123,
+   "sign": "if",
+   "label": "if",
+   "lookup": "if",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 124,
+   "sign": "into",
+   "label": "into",
+   "lookup": "into",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 125,
+   "sign": "jacket",
+   "label": "jacket",
+   "lookup": "jacket",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 126,
+   "sign": "jeans",
+   "label": "jeans",
+   "lookup": "jeans",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 127,
+   "sign": "jump",
+   "label": "jump",
+   "lookup": "jump",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 128,
+   "sign": "kiss",
+   "label": "kiss",
+   "lookup": "kiss",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 129,
+   "sign": "kitty",
+   "label": "kitty",
+   "lookup": "kitty",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 130,
+   "sign": "lamp",
+   "label": "lamp",
+   "lookup": "lamp",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 131,
+   "sign": "later",
+   "label": "later",
+   "lookup": "later",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 132,
+   "sign": "like",
+   "label": "like",
+   "lookup": "like",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 133,
+   "sign": "lion",
+   "label": "lion",
+   "lookup": "lion",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 134,
+   "sign": "lips",
+   "label": "lips",
+   "lookup": "lips",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 135,
+   "sign": "listen",
+   "label": "listen",
+   "lookup": "listen",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 136,
+   "sign": "look",
+   "label": "look",
+   "lookup": "look",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 137,
+   "sign": "loud",
+   "label": "loud",
+   "lookup": "loud",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 138,
+   "sign": "mad",
+   "label": "mad",
+   "lookup": "mad",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 139,
+   "sign": "make",
+   "label": "make",
+   "lookup": "make",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 140,
+   "sign": "man",
+   "label": "man",
+   "lookup": "man",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 141,
+   "sign": "many",
+   "label": "many",
+   "lookup": "many",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 142,
+   "sign": "milk",
+   "label": "milk",
+   "lookup": "milk",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 143,
+   "sign": "minemy",
+   "label": "mine / my",
+   "lookup": "my",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 144,
+   "sign": "mitten",
+   "label": "mitten",
+   "lookup": "mitten",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 145,
+   "sign": "mom",
+   "label": "mom",
+   "lookup": "mom",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 146,
+   "sign": "moon",
+   "label": "moon",
+   "lookup": "moon",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 147,
+   "sign": "morning",
+   "label": "morning",
+   "lookup": "morning",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 148,
+   "sign": "mouse",
+   "label": "mouse",
+   "lookup": "mouse",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 149,
+   "sign": "mouth",
+   "label": "mouth",
+   "lookup": "mouth",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 150,
+   "sign": "nap",
+   "label": "nap",
+   "lookup": "nap",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 151,
+   "sign": "napkin",
+   "label": "napkin",
+   "lookup": "napkin",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 152,
+   "sign": "night",
+   "label": "night",
+   "lookup": "night",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 153,
+   "sign": "no",
+   "label": "no",
+   "lookup": "no",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 154,
+   "sign": "noisy",
+   "label": "noisy",
+   "lookup": "noisy",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 155,
+   "sign": "nose",
+   "label": "nose",
+   "lookup": "nose",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 156,
+   "sign": "not",
+   "label": "not",
+   "lookup": "not",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 157,
+   "sign": "now",
+   "label": "now",
+   "lookup": "now",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 158,
+   "sign": "nuts",
+   "label": "nuts",
+   "lookup": "nuts",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 159,
+   "sign": "old",
+   "label": "old",
+   "lookup": "old",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 160,
+   "sign": "on",
+   "label": "on",
+   "lookup": "on",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 161,
+   "sign": "open",
+   "label": "open",
+   "lookup": "open",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 162,
+   "sign": "orange",
+   "label": "orange",
+   "lookup": "orange",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 163,
+   "sign": "outside",
+   "label": "outside",
+   "lookup": "outside",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 164,
+   "sign": "owie",
+   "label": "owie",
+   "lookup": "hurt",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 165,
+   "sign": "owl",
+   "label": "owl",
+   "lookup": "owl",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 166,
+   "sign": "pajamas",
+   "label": "pajamas",
+   "lookup": "pajamas",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 167,
+   "sign": "pen",
+   "label": "pen",
+   "lookup": "pen",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 168,
+   "sign": "pencil",
+   "label": "pencil",
+   "lookup": "pencil",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 169,
+   "sign": "penny",
+   "label": "penny",
+   "lookup": "penny",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 170,
+   "sign": "person",
+   "label": "person",
+   "lookup": "person",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 171,
+   "sign": "pig",
+   "label": "pig",
+   "lookup": "pig",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 172,
+   "sign": "pizza",
+   "label": "pizza",
+   "lookup": "pizza",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 173,
+   "sign": "please",
+   "label": "please",
+   "lookup": "please",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 174,
+   "sign": "police",
+   "label": "police",
+   "lookup": "police",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 175,
+   "sign": "pool",
+   "label": "pool",
+   "lookup": "pool",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 176,
+   "sign": "potty",
+   "label": "potty",
+   "lookup": "potty",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 177,
+   "sign": "pretend",
+   "label": "pretend",
+   "lookup": "pretend",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 178,
+   "sign": "pretty",
+   "label": "pretty",
+   "lookup": "pretty",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 179,
+   "sign": "puppy",
+   "label": "puppy",
+   "lookup": "puppy",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 180,
+   "sign": "puzzle",
+   "label": "puzzle",
+   "lookup": "puzzle",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 181,
+   "sign": "quiet",
+   "label": "quiet",
+   "lookup": "quiet",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 182,
+   "sign": "radio",
+   "label": "radio",
+   "lookup": "radio",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 183,
+   "sign": "rain",
+   "label": "rain",
+   "lookup": "rain",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 184,
+   "sign": "read",
+   "label": "read",
+   "lookup": "read",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 185,
+   "sign": "red",
+   "label": "red",
+   "lookup": "red",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 186,
+   "sign": "refrigerator",
+   "label": "refrigerator",
+   "lookup": "refrigerator",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 187,
+   "sign": "ride",
+   "label": "ride",
+   "lookup": "ride",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 188,
+   "sign": "room",
+   "label": "room",
+   "lookup": "room",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 189,
+   "sign": "sad",
+   "label": "sad",
+   "lookup": "sad",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 190,
+   "sign": "same",
+   "label": "same",
+   "lookup": "same",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 191,
+   "sign": "say",
+   "label": "say",
+   "lookup": "say",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 192,
+   "sign": "scissors",
+   "label": "scissors",
+   "lookup": "scissors",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 193,
+   "sign": "see",
+   "label": "see",
+   "lookup": "see",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 194,
+   "sign": "shhh",
+   "label": "shh",
+   "lookup": "quiet",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 195,
+   "sign": "shirt",
+   "label": "shirt",
+   "lookup": "shirt",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 196,
+   "sign": "shoe",
+   "label": "shoe",
+   "lookup": "shoe",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 197,
+   "sign": "shower",
+   "label": "shower",
+   "lookup": "shower",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 198,
+   "sign": "sick",
+   "label": "sick",
+   "lookup": "sick",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 199,
+   "sign": "sleep",
+   "label": "sleep",
+   "lookup": "sleep",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 200,
+   "sign": "sleepy",
+   "label": "sleepy",
+   "lookup": "sleepy",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 201,
+   "sign": "smile",
+   "label": "smile",
+   "lookup": "smile",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 202,
+   "sign": "snack",
+   "label": "snack",
+   "lookup": "snack",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 203,
+   "sign": "snow",
+   "label": "snow",
+   "lookup": "snow",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 204,
+   "sign": "stairs",
+   "label": "stairs",
+   "lookup": "stairs",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 205,
+   "sign": "stay",
+   "label": "stay",
+   "lookup": "stay",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 206,
+   "sign": "sticky",
+   "label": "sticky",
+   "lookup": "sticky",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 207,
+   "sign": "store",
+   "label": "store",
+   "lookup": "store",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 208,
+   "sign": "story",
+   "label": "story",
+   "lookup": "story",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 209,
+   "sign": "stuck",
+   "label": "stuck",
+   "lookup": "stuck",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 210,
+   "sign": "sun",
+   "label": "sun",
+   "lookup": "sun",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 211,
+   "sign": "table",
+   "label": "table",
+   "lookup": "table",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 212,
+   "sign": "talk",
+   "label": "talk",
+   "lookup": "talk",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 213,
+   "sign": "taste",
+   "label": "taste",
+   "lookup": "taste",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 214,
+   "sign": "thankyou",
+   "label": "thank you",
+   "lookup": "thank you",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 215,
+   "sign": "that",
+   "label": "that",
+   "lookup": "that",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 216,
+   "sign": "there",
+   "label": "there",
+   "lookup": "there",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 217,
+   "sign": "think",
+   "label": "think",
+   "lookup": "think",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 218,
+   "sign": "thirsty",
+   "label": "thirsty",
+   "lookup": "thirsty",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 219,
+   "sign": "tiger",
+   "label": "tiger",
+   "lookup": "tiger",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 220,
+   "sign": "time",
+   "label": "time",
+   "lookup": "time",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 221,
+   "sign": "tomorrow",
+   "label": "tomorrow",
+   "lookup": "tomorrow",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 222,
+   "sign": "tongue",
+   "label": "tongue",
+   "lookup": "tongue",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 223,
+   "sign": "tooth",
+   "label": "tooth",
+   "lookup": "tooth",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 224,
+   "sign": "toothbrush",
+   "label": "toothbrush",
+   "lookup": "toothbrush",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 225,
+   "sign": "touch",
+   "label": "touch",
+   "lookup": "touch",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 226,
+   "sign": "toy",
+   "label": "toy",
+   "lookup": "toy",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 227,
+   "sign": "tree",
+   "label": "tree",
+   "lookup": "tree",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 228,
+   "sign": "uncle",
+   "label": "uncle",
+   "lookup": "uncle",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 229,
+   "sign": "underwear",
+   "label": "underwear",
+   "lookup": "underwear",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 230,
+   "sign": "up",
+   "label": "up",
+   "lookup": "up",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 231,
+   "sign": "vacuum",
+   "label": "vacuum",
+   "lookup": "vacuum",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 232,
+   "sign": "wait",
+   "label": "wait",
+   "lookup": "wait",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 233,
+   "sign": "wake",
+   "label": "wake",
+   "lookup": "wake",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 234,
+   "sign": "water",
+   "label": "water",
+   "lookup": "water",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 235,
+   "sign": "wet",
+   "label": "wet",
+   "lookup": "wet",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 236,
+   "sign": "weus",
+   "label": "we / us",
+   "lookup": "we",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 237,
+   "sign": "where",
+   "label": "where",
+   "lookup": "where",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 238,
+   "sign": "white",
+   "label": "white",
+   "lookup": "white",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 239,
+   "sign": "who",
+   "label": "who",
+   "lookup": "who",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 240,
+   "sign": "why",
+   "label": "why",
+   "lookup": "why",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 241,
+   "sign": "will",
+   "label": "will",
+   "lookup": "will",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 242,
+   "sign": "wolf",
+   "label": "wolf",
+   "lookup": "wolf",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 243,
+   "sign": "yellow",
+   "label": "yellow",
+   "lookup": "yellow",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 244,
+   "sign": "yes",
+   "label": "yes",
+   "lookup": "yes",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 245,
+   "sign": "yesterday",
+   "label": "yesterday",
+   "lookup": "yesterday",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 246,
+   "sign": "yourself",
+   "label": "yourself",
+   "lookup": "yourself",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 247,
+   "sign": "yucky",
+   "label": "yucky",
+   "lookup": "yucky",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 248,
+   "sign": "zebra",
+   "label": "zebra",
+   "lookup": "zebra",
+   "shipped": true,
+   "heldOutTop1": null
+  },
+  {
+   "index": 249,
+   "sign": "zipper",
+   "label": "zipper",
+   "lookup": "zipper",
+   "shipped": true,
+   "heldOutTop1": null
+  }
+ ]
+}

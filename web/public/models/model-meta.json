@@ -1,0 +1,29 @@
+{
+ "version": "stub-e9b501f882",
+ "featureVersion": 1,
+ "featureSet": "hands_pose",
+ "fps": 30.0,
+ "minFrames": 8,
+ "maxFrames": 64,
+ "featureDim": 299,
+ "classes": 250,
+ "embeddingDim": 128,
+ "io": {
+  "input": "frames",
+  "outputs": [
+   "logits",
+   "embedding"
+  ],
+  "opset": 17
+ },
+ "trainedOn": null,
+ "metrics": null,
+ "calibration": {
+  "temperature": 1.0,
+  "notSureBelow": 0.5
+ },
+ "teach": {
+  "minSimilarity": 0.9662,
+  "margin": 0.04
+ }
+}
