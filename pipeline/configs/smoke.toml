@@ -1,0 +1,23 @@
+# End-to-end smoke run on the synthetic stand-in (`gesturesign smoke`):
+# prepare -> train (2 steps) -> evaluate -> export, in well under two minutes.
+name = "smoke"
+seed = 7
+feature_set = "hands_pose"
+fps = 30
+source_fps = 30
+min_frames = 8
+max_frames = 64
+
+[split]
+test_participants = [106, 107, 108]
+val_participants = [104, 105]
+
+[train]
+batch_size = 16
+epochs = 1
+max_steps = 2
+warmup_epochs = 0
+patience = 1
+
+[evaluate]
+confusion_pairs = 5

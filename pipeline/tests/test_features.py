@@ -145,3 +145,16 @@ def test_sequence_features_shape_and_velocity() -> None:
 def test_empty_sequence_gives_empty_features() -> None:
     out = ft.sequence_features(blank_frames(0), "hands_pose")
     assert out.shape == (0, ft.sequence_feature_dim("hands_pose"))
+
+
+def test_tied_hand_counts_pick_the_hand_that_moves_more() -> None:
+    frames = full_body_frames(10, seed=8)  # both hands in every frame; the right moves more
+    assert not ft.left_is_dominant(frames)
+    assert ft.left_is_dominant(ft.mirror_landmarks(frames))
+
+
+def test_tie_break_keeps_mirrored_two_handed_clips_identical() -> None:
+    frames = full_body_frames(10, seed=9)
+    a = ft.sequence_features(frames, "hands_pose")
+    b = ft.sequence_features(ft.mirror_landmarks(frames), "hands_pose")
+    np.testing.assert_allclose(a, b, atol=1e-5)

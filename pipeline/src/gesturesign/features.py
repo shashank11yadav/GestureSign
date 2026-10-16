@@ -5,10 +5,10 @@ Per frame:
 1. Pick the hands, the upper-body pose and, for ``hands_pose_lips``, 40 lip points.
 2. Centre on the shoulder midpoint and divide by the shoulder width, using one
    anchor per sequence (the median over frames where both shoulders are seen).
-3. Canonicalise handedness: when the left hand is seen in more frames than the
-   right, mirror x and swap left and right so the model always sees the signing
-   hand in the "dominant" slot. A mirrored webcam image therefore produces the
-   same features as an unmirrored one.
+3. Canonicalise handedness: when the left hand is the signing hand (seen in
+   more frames; on a tie, moving more), mirror x and swap left and right so the
+   model always sees the signing hand in the "dominant" slot. A mirrored webcam
+   image therefore produces the same features as an unmirrored one.
 4. Add each hand's shape relative to its wrist, scaled by the wrist to
    middle-knuckle length, so hand shape does not depend on where the hand is.
 5. Replace NaN with 0 and append a presence flag per part.
@@ -117,11 +117,27 @@ def _part_present(frames: Frames, start: int, size: int) -> npt.NDArray[np.bool_
     return np.isfinite(frames[:, start : start + size, 0]).any(axis=1)
 
 
+def _wrist_travel(frames: Frames, start: int) -> float:
+    """Total wrist movement in x/y between consecutive frames that both show the hand."""
+    wrist = frames[:, start + lm.HAND_WRIST, :2].astype(np.float64)
+    if wrist.shape[0] < 2:
+        return 0.0
+    step = np.abs(np.diff(wrist, axis=0)).sum(axis=1)
+    return float(np.nansum(step))
+
+
 def left_is_dominant(frames: Frames) -> bool:
-    """True when the left hand is seen in more frames than the right hand."""
+    """True when the left hand is the signing hand.
+
+    The signing hand is the one seen in more frames; on a tie, the one whose
+    wrist travels further. Both rules swap exactly when the image is mirrored,
+    so a mirrored clip always canonicalises to the same features.
+    """
     left = int(_part_present(frames, lm.LEFT_HAND_START, lm.N_HAND).sum())
     right = int(_part_present(frames, lm.RIGHT_HAND_START, lm.N_HAND).sum())
-    return left > right
+    if left != right:
+        return left > right
+    return _wrist_travel(frames, lm.LEFT_HAND_START) > _wrist_travel(frames, lm.RIGHT_HAND_START)
 
 
 def _indices(feature_set: FeatureSet, mirror: bool) -> tuple[list[int], list[int], list[int]]:

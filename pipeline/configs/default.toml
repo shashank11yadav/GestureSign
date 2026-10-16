@@ -9,8 +9,9 @@ seed = 42
 feature_set = "hands_pose"
 
 # asl-signs is recorded at about 30 fps; the browser resamples webcam frames to
-# this rate from their timestamps.
+# `fps` from their timestamps.
 fps = 30
+source_fps = 30
 min_frames = 8
 max_frames = 64
 
@@ -57,3 +58,7 @@ hand_drop = 0.05
 ship_min_top1 = 0.60
 not_sure_precision = 0.80
 confusion_pairs = 20
+few_shot_ways = 8
+few_shot_shots = 3
+few_shot_episodes = 1000
+teach_margin = 0.04

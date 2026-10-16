@@ -84,6 +84,12 @@ class EvalConfig:
     # predictions are still at least this precise.
     not_sure_precision: float = 0.80
     confusion_pairs: int = 20
+    # Teach-your-own episodes, matching the browser: up to 8 gestures, 3 takes each.
+    few_shot_ways: int = 8
+    few_shot_shots: int = 3
+    few_shot_episodes: int = 1000
+    # A taught gesture must beat the runner-up by this cosine margin.
+    teach_margin: float = 0.04
 
 
 @dataclass(frozen=True)
@@ -93,6 +99,7 @@ class Config:
     # Decided by the A1 benchmark; see pipeline/reports/bench.md.
     feature_set: FeatureSet = "hands_pose"
     fps: float = 30.0
+    source_fps: float = 30.0
     min_frames: int = 8
     max_frames: int = 64
     split: SplitConfig = field(default_factory=SplitConfig)
@@ -100,6 +107,10 @@ class Config:
     train: TrainConfig = field(default_factory=TrainConfig)
     augment: AugmentConfig = field(default_factory=AugmentConfig)
     evaluate: EvalConfig = field(default_factory=EvalConfig)
+
+
+def config_from_dict(raw: dict[str, Any], where: str = "config") -> Config:
+    return cast(Config, _build(Config, raw, where))
 
 
 def _build(cls: type[Any], raw: dict[str, Any], where: str) -> Any:
@@ -124,7 +135,7 @@ def _build(cls: type[Any], raw: dict[str, Any], where: str) -> Any:
 def load_config(path: Path = DEFAULT_CONFIG) -> Config:
     with path.open("rb") as fh:
         raw = tomllib.load(fh)
-    config = cast(Config, _build(Config, raw, path.name))
+    config = config_from_dict(raw, path.name)
     if config.feature_set not in get_args(FeatureSet):
         raise ValueError(f"feature_set must be one of {FEATURE_SETS}, got {config.feature_set!r}")
     if not 1 <= config.min_frames <= config.max_frames:
