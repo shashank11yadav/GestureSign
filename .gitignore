@@ -1,0 +1,52 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+kaggle.json
+
+# Datasets, caches and training runs (they live outside the repo or are rebuilt)
+pipeline/data/
+pipeline/runs/
+*.parquet
+*.npz
+*.pt
+*.ckpt
+*.y4m
+*.zip
+.cache/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Node / web
+node_modules/
+web/dist/
+web/dist-test/
+web/test-results/
+web/playwright-report/
+web/blob-report/
+web/playwright/.cache/
+*.tsbuildinfo
+.vite/
+coverage/
+
+# MediaPipe and onnxruntime files copied or fetched at build time
+web/public/vendor/
+
+# Editors and OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
