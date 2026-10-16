@@ -53,6 +53,24 @@ export class GestureStore {
     return (await this.open()).transaction(STORE, mode).objectStore(STORE);
   }
 
+  /** Run writes in one transaction and resolve only once it has committed. */
+  private async write(run: (store: IDBObjectStore) => void): Promise<void> {
+    const tx = (await this.open()).transaction(STORE, 'readwrite');
+    const done = new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => {
+        resolve();
+      };
+      tx.onerror = () => {
+        reject(tx.error ?? new Error('IndexedDB write failed'));
+      };
+      tx.onabort = () => {
+        reject(tx.error ?? new Error('IndexedDB write aborted'));
+      };
+    });
+    run(tx.objectStore(STORE));
+    return done;
+  }
+
   /** Gestures saved for this model version; others are deleted and counted. */
   async load(modelVersion: string): Promise<{ gestures: Gesture[]; discarded: number }> {
     const all = await request(
@@ -61,8 +79,9 @@ export class GestureStore {
     const keep = all.filter((g) => g.modelVersion === modelVersion);
     const stale = all.filter((g) => g.modelVersion !== modelVersion);
     if (stale.length) {
-      const store = await this.store('readwrite');
-      await Promise.all(stale.map((g) => request(store.delete(g.id))));
+      await this.write((store) => {
+        for (const g of stale) store.delete(g.id);
+      });
     }
     keep.sort((a, b) => a.updatedAt - b.updatedAt);
     return {
@@ -83,14 +102,14 @@ export class GestureStore {
       modelVersion,
       updatedAt: Date.now(),
     };
-    await request((await this.store('readwrite')).put(stored));
+    await this.write((store) => store.put(stored));
   }
 
   async remove(id: string): Promise<void> {
-    await request((await this.store('readwrite')).delete(id));
+    await this.write((store) => store.delete(id));
   }
 
   async clear(): Promise<void> {
-    await request((await this.store('readwrite')).clear());
+    await this.write((store) => store.clear());
   }
 }

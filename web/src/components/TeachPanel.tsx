@@ -122,19 +122,32 @@ export function TeachPanel({ session, model }: { session: Session; model: Loaded
     session.resetRecognition();
   };
 
+  const storageFailed = () => {
+    setNotice('This browser refused to update its storage; the change lasts until you leave.');
+  };
+
   const remove = (id: string) => {
-    setGestures((list) => list.filter((g) => g.id !== id));
     if (armed === id) setArmed(null);
     setMatch(null);
-    void store.remove(id).catch(() => undefined);
+    // Update the list once the deletion has committed, so leaving right away is safe.
+    void store
+      .remove(id)
+      .catch(storageFailed)
+      .finally(() => {
+        setGestures((list) => list.filter((g) => g.id !== id));
+      });
   };
 
   const clearAll = () => {
-    setGestures([]);
     setArmed(null);
     setMatch(null);
     setConfirmClear(false);
-    void store.clear().catch(() => undefined);
+    void store
+      .clear()
+      .catch(storageFailed)
+      .finally(() => {
+        setGestures([]);
+      });
   };
 
   return (
@@ -253,7 +266,7 @@ export function TeachPanel({ session, model }: { session: Session; model: Loaded
                       setArmed(null);
                     }}
                   >
-                    Stop
+                    Stop<span className="sr-only"> recording {g.name}</span>
                   </Button>
                 ) : null}
                 <Button
