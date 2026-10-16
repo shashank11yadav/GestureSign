@@ -299,7 +299,7 @@ def evaluate(
 
 
 def metrics_markdown(metrics: dict[str, Any]) -> str:
-    """README tables, generated from metrics.json."""
+    """README tables, built from metrics.json."""
     t, s, cal, teach = metrics["test"], metrics["shipped"], metrics["calibration"], metrics["teach"]
     d = metrics["data"]
     lines = [

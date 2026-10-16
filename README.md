@@ -190,7 +190,7 @@ shared/     the feature-parity fixture both test suites check
   CC BY 4.0. Replay mode bundles a few held-out clips from it once
   `gesturesign replay-clips` has been run; until then it plays synthetic
   motion patterns.
-- [MediaPipe](https://github.com/google-ai-edge/mediapipe) (Apache 2.0) for the
+- [MediaPipe](https://github.com/google/mediapipe) (Apache 2.0) for the
   hand, pose and face landmarkers.
 - [ONNX Runtime Web](https://github.com/microsoft/onnxruntime) (MIT) for
   in-browser inference.
