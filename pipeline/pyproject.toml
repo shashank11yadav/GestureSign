@@ -1,0 +1,67 @@
+[project]
+name = "gesturesign"
+version = "0.1.0"
+description = "Training pipeline for an in-browser ASL sign recogniser: landmark features, a conv-transformer, held-out evaluation and ONNX export."
+requires-python = ">=3.12"
+license = "MIT"
+authors = [{ name = "Shashank Yadav" }]
+dependencies = [
+    "numpy>=2.5.4",
+    "onnx>=1.23.2",
+    "onnxruntime>=1.31.0",
+    "onnxscript>=0.7.2",
+    "pandas>=3.0.6",
+    "pyarrow>=26.0.0",
+    "torch>=2.14.1",
+    "typer>=0.27.3",
+]
+
+[project.scripts]
+gesturesign = "gesturesign.cli:main"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4.0",
+    "pandas-stubs>=3.0.5.260914",
+    "pip-audit>=2.10.1",
+    "pytest>=9.1.1",
+    "ruff>=0.17.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.28,<0.14"]
+build-backend = "uv_build"
+
+# CPU-only torch on Linux keeps CI installs small; macOS wheels are CPU/MPS already.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "N", "S", "PT", "C4", "PTH", "NPY", "PD"]
+# Array code reads better with single-letter shape names (T, F, B).
+ignore = ["N806", "N803"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+files = ["src", "tests"]
+
+[[tool.mypy.overrides]]
+module = ["onnxruntime.*", "onnx.*", "pyarrow.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
