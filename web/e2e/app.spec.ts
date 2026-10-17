@@ -59,6 +59,29 @@ test.describe('page', () => {
   });
 });
 
+test.describe('start-up', () => {
+  test('downloads the landmark and sign models on page load, once each, with no WebGPU runtime', async ({
+    page,
+    errors,
+  }) => {
+    const requested: string[] = [];
+    page.context().on('request', (request) => {
+      requested.push(new URL(request.url()).pathname);
+    });
+    await openReady(page);
+    // MediaPipe starts before any click, so the camera's first frame is tracked at once.
+    await expect
+      .poll(() => requested.filter((p) => p.includes('/vendor/mediapipe/models/')).length)
+      .toBeGreaterThan(0);
+    await expect(page.getByRole('button', { name: 'Start camera' })).toBeVisible();
+    const count = (suffix: string) => requested.filter((p) => p.endsWith(suffix)).length;
+    expect(count('/models/model.onnx')).toBe(1);
+    expect(count('/vendor/ort/ort-wasm-simd-threaded.wasm')).toBe(1);
+    expect(requested.filter((p) => /jsep|asyncify|webgpu/i.test(p))).toEqual([]);
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe('camera problems (review focus 1)', () => {
   const cases = [
     ['NotAllowedError', 'Camera access was blocked'],

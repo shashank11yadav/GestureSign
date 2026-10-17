@@ -22,7 +22,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:e2e": "npm run build:test && playwright test",
-    "bench": "node scripts/bench.mjs"
+    "bench": "node scripts/bench.mjs",
+    "cold-start": "node scripts/cold-start.mjs"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "1.1.1",

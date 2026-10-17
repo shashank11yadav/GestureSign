@@ -8,7 +8,7 @@ import './styles.css';
 reloadOnStaleChunk();
 
 const session = new Session();
-void session.loadModel();
+session.warmUp();
 
 // The e2e injection hook exists only in `vite build --mode test`; in production
 // builds this branch is constant-false and the module is never bundled.

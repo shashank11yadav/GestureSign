@@ -11,7 +11,7 @@ import {
   type CameraProblem,
 } from '../lib/camera';
 import { emptyFrame, type Frame } from '../ml/landmarks';
-import { ModelClient, type LoadedModel } from '../ml/model-client';
+import { loadMeta, ModelClient, type LoadedModel } from '../ml/model-client';
 import { Recognizer, type RecognitionResult, type RecognizerEvent } from '../ml/recognizer';
 import type { FrameStatus } from '../ml/segmenter';
 import { TrackerClient } from '../ml/tracker-client';
@@ -40,6 +40,15 @@ export interface SessionSnapshot {
 
 export type FrameListener = (frame: Frame, source: Source) => void;
 export type ResultListener = (result: RecognitionResult, id: number) => void;
+
+/**
+ * Records the first time something happens as a performance mark
+ * (`gesturesign:<name>`), which scripts/cold-start.mjs reads.
+ */
+function mark(name: 'model-ready' | 'camera-click' | 'first-landmarks'): void {
+  const full = `gesturesign:${name}`;
+  if (performance.getEntriesByName(full).length === 0) performance.mark(full);
+}
 
 /** Empty frames appended after a clip so the segmenter sees the hands leave. */
 const TAIL_MS = 450;
@@ -102,6 +111,38 @@ export class Session {
     return () => this.resultListeners.delete(listener);
   }
 
+  // --- start-up -------------------------------------------------------------
+  /**
+   * Called on page load: loads the sign model and, in parallel, starts
+   * MediaPipe in its worker (downloading the landmark model and its WASM
+   * runtime), so the first camera frame is tracked as soon as the visitor
+   * allows the camera. Neither touches the camera. With the browser's
+   * data-saver setting on, MediaPipe waits for the camera click instead.
+   */
+  warmUp(): void {
+    void this.loadModel();
+    const connection = (navigator as { connection?: { saveData?: boolean } }).connection;
+    if (connection?.saveData !== true) {
+      this.ensureTracker().catch(() => undefined);
+    }
+  }
+
+  /** The MediaPipe worker, created once; a failed start is retried on the next call. */
+  private ensureTracker(): Promise<TrackerClient> {
+    if (!this.tracker) {
+      const created = loadMeta().then(
+        (meta) => TrackerClient.create(meta.featureSet),
+        // The model's own error is shown elsewhere; track with the default landmarks.
+        () => TrackerClient.create('hands_pose_lips'),
+      );
+      this.tracker = created;
+      created.catch(() => {
+        if (this.tracker === created) this.tracker = null;
+      });
+    }
+    return this.tracker;
+  }
+
   // --- model ----------------------------------------------------------------
   async loadModel(): Promise<void> {
     if (this.snapshot.model.status === 'ready') return;
@@ -117,6 +158,7 @@ export class Session {
         },
       );
       this.set({ model: { status: 'ready', model } });
+      mark('model-ready');
     } catch (error) {
       this.set({
         model: { status: 'error', message: error instanceof Error ? error.message : String(error) },
@@ -166,6 +208,7 @@ export class Session {
 
   async startCamera(): Promise<void> {
     const token = ++this.startToken;
+    mark('camera-click');
     this.stopReplay();
     this.set({
       source: 'starting',
@@ -174,13 +217,8 @@ export class Session {
       trackerError: null,
       status: null,
     });
-    const featureSet =
-      this.snapshot.model.status === 'ready'
-        ? this.snapshot.model.model.meta.featureSet
-        : 'hands_pose_lips';
-    // Start MediaPipe while the permission prompt is open; it is reused afterwards.
-    const tracker = (this.tracker ??= TrackerClient.create(featureSet));
-    tracker.catch(() => undefined);
+    // Usually already started by warmUp(); otherwise it starts while the permission prompt is open.
+    const tracker = this.ensureTracker();
     let stream: MediaStream;
     try {
       stream = await openCamera();
@@ -208,10 +246,10 @@ export class Session {
       const client = await tracker;
       if (token !== this.startToken || this.snapshot.source !== 'camera') return;
       client.start(video, (f) => {
+        mark('first-landmarks');
         this.push(f.frame, f.t, f.poses, 'camera');
       });
     } catch (error) {
-      this.tracker = null;
       this.set({
         trackerError: `Hand tracking could not start: ${error instanceof Error ? error.message : String(error)}`,
       });

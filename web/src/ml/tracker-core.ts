@@ -50,18 +50,54 @@ type Image = ImageBitmap | HTMLVideoElement;
  */
 const useModule = typeof document === 'undefined';
 
+interface Prefetched {
+  stream(): ReadableStreamDefaultReader<Uint8Array>;
+}
+
+/**
+ * Starts downloading a .task model now and hands MediaPipe a stream that
+ * yields it once complete. MediaPipe loads its WASM runtime before it reads
+ * the model, so the two downloads run in parallel instead of one after the
+ * other. Call stream() again for a retry (e.g. on the CPU delegate).
+ */
+function prefetch(url: string): Prefetched {
+  const bytes = fetch(url).then(async (response) => {
+    if (!response.ok) throw new Error(`${url.split('/').pop() ?? url}: HTTP ${response.status}`);
+    return new Uint8Array(await response.arrayBuffer());
+  });
+  // Handled where the stream is read; this only keeps an early failure from being "unhandled".
+  bytes.catch(() => undefined);
+  return {
+    stream: () =>
+      new ReadableStream<Uint8Array>({
+        async start(controller) {
+          try {
+            controller.enqueue(await bytes);
+            controller.close();
+          } catch (error) {
+            controller.error(error);
+          }
+        },
+      }).getReader(),
+  };
+}
+
 const points = (list: NormalizedLandmark[] | undefined) =>
   (list ?? []).map((p) => ({ x: p.x, y: p.y, z: p.z }));
 
-async function handsAndPose(opts: TrackerOptions, delegate: Delegate): Promise<Tracker> {
+async function handsAndPose(
+  opts: TrackerOptions,
+  delegate: Delegate,
+  models: { hand: Prefetched; pose: Prefetched },
+): Promise<Tracker> {
   const fileset = await FilesetResolver.forVisionTasks(opts.wasmBase, useModule);
   const hand = await HandLandmarker.createFromOptions(fileset, {
-    baseOptions: { modelAssetPath: `${opts.modelBase}hand_landmarker.task`, delegate },
+    baseOptions: { modelAssetBuffer: models.hand.stream(), delegate },
     runningMode: 'VIDEO',
     numHands: 2,
   });
   const pose = await PoseLandmarker.createFromOptions(fileset, {
-    baseOptions: { modelAssetPath: `${opts.modelBase}pose_landmarker_lite.task`, delegate },
+    baseOptions: { modelAssetBuffer: models.pose.stream(), delegate },
     runningMode: 'VIDEO',
     // Two, so a second person in view is noticed (and recognition pauses).
     numPoses: 2,
@@ -89,10 +125,14 @@ async function handsAndPose(opts: TrackerOptions, delegate: Delegate): Promise<T
   };
 }
 
-async function holistic(opts: TrackerOptions, delegate: Delegate): Promise<Tracker> {
+async function holistic(
+  opts: TrackerOptions,
+  delegate: Delegate,
+  task: Prefetched,
+): Promise<Tracker> {
   const fileset = await FilesetResolver.forVisionTasks(opts.wasmBase, useModule);
   const model = await HolisticLandmarker.createFromOptions(fileset, {
-    baseOptions: { modelAssetPath: `${opts.modelBase}holistic_landmarker.task`, delegate },
+    baseOptions: { modelAssetBuffer: task.stream(), delegate },
     runningMode: 'VIDEO',
   });
   return {
@@ -124,13 +164,23 @@ async function holistic(opts: TrackerOptions, delegate: Delegate): Promise<Track
 
 /** Builds the landmarkers, falling back from the GPU to the CPU delegate. */
 export async function createTracker(opts: TrackerOptions): Promise<Tracker> {
-  const build = opts.featureSet === 'hands_pose_lips' ? holistic : handsAndPose;
+  let build: (delegate: Delegate) => Promise<Tracker>;
+  if (opts.featureSet === 'hands_pose_lips') {
+    const model = prefetch(`${opts.modelBase}holistic_landmarker.task`);
+    build = (delegate) => holistic(opts, delegate, model);
+  } else {
+    const models = {
+      hand: prefetch(`${opts.modelBase}hand_landmarker.task`),
+      pose: prefetch(`${opts.modelBase}pose_landmarker_lite.task`),
+    };
+    build = (delegate) => handsAndPose(opts, delegate, models);
+  }
   if (opts.delegate === 'GPU') {
     try {
-      return await build(opts, 'GPU');
+      return await build('GPU');
     } catch {
       // No WebGL2 (e.g. in a worker without OffscreenCanvas support): use the CPU.
     }
   }
-  return build(opts, 'CPU');
+  return build('CPU');
 }
