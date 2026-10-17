@@ -8,6 +8,13 @@ import type { FrameStatus } from '../ml/segmenter';
 import { ReplayPicker } from './ReplayPicker';
 import { Button } from './ui';
 
+/**
+ * Replay clips come from asl-signs, which was filmed on phones held upright,
+ * so their landmarks are drawn in a portrait 9:16 box to keep the signer's
+ * proportions (and the whole frame) on the stage.
+ */
+const REPLAY_ASPECT = 9 / 16;
+
 const STATUS_TEXT: Record<FrameStatus, string> = {
   nothing: 'No one in view',
   'no-hands': 'Hands not in view',
@@ -86,7 +93,7 @@ export function Stage({ session, snap }: { session: Session; snap: SessionSnapsh
         const aspect =
           source === 'camera' && video && video.videoWidth
             ? video.videoWidth / video.videoHeight
-            : 4 / 3;
+            : REPLAY_ASPECT;
         drawLandmarks(ctx, pending, undefined, { aspect });
       });
     });

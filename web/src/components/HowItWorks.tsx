@@ -63,14 +63,24 @@ export function HowItWorks({ model }: { model: ModelState }) {
         <Card className="p-5">
           <h3 className="font-semibold">Held-out accuracy</h3>
           {meta?.metrics ? (
+            <p className="mt-1 text-sm text-ink-muted">
+              On {meta.metrics.testClips.toLocaleString('en')} clips from signers the model never
+              saw in training.
+            </p>
+          ) : null}
+          {meta?.metrics ? (
             <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
               {[
                 ['Top-1, all signs', pct(meta.metrics.top1)],
                 ['Top-5, all signs', pct(meta.metrics.top5)],
-                [
-                  `Top-1, ${meta.metrics.shippedSigns} shipped signs`,
-                  pct(meta.metrics.shippedTop1),
-                ],
+                // When every sign ships, a shipped-set top-1 would repeat the first tile;
+                // show the top-3 instead, which matches the three guesses on this page.
+                meta.metrics.shippedSigns === meta.classes
+                  ? ['Top-3, all signs', pct(meta.metrics.shippedTop3)]
+                  : [
+                      `Top-1, ${meta.metrics.shippedSigns} shipped signs`,
+                      pct(meta.metrics.shippedTop1),
+                    ],
                 ['Teach your own (8-way, 3 takes)', pct(meta.metrics.teachAccuracy)],
               ].map(([k, v]) => (
                 <div key={k} className="rounded-lg bg-surface-muted p-3">
