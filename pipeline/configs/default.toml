@@ -34,7 +34,8 @@ dropout = 0.1
 cosine_scale = 16.0
 
 [train]
-# About 1.5 min per epoch on an M4 (MPS); early stopping usually ends sooner.
+# About 1.7 min per epoch on an M4 (MPS). The committed model's run stopped
+# early after 47 epochs (best validation top-1 at epoch 39), in about 80 min.
 batch_size = 128
 epochs = 50
 lr = 1e-3
