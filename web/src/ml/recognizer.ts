@@ -93,8 +93,11 @@ export class Recognizer {
       this.emit({ type: 'discarded' });
       return;
     }
+    // Vote only over frames where the signer's hands were seen: frames without
+    // hands (the gap that ends a sign, short dropouts) say nothing about framing.
     const partialFrames = statuses.filter((s) => s === 'partial').length;
-    const partial = partialFrames > statuses.length / 2;
+    const framedFrames = partialFrames + statuses.filter((s) => s === 'ok').length;
+    const partial = partialFrames > framedFrames / 2;
     void this.classify(event.segment, partial, this.generation);
   }
 

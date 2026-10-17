@@ -4,7 +4,9 @@
  * A segment starts when a hand is present and moving, and ends when the hands
  * are gone, or held still, for `gapMs` (300 ms). Short dropouts inside a sign
  * are bridged. After a "still" ending the segmenter waits for new motion, so
- * resting a hand in view does not produce a stream of empty guesses.
+ * resting a hand in view does not produce a stream of empty guesses, and a
+ * quick movement out of a still hold that ends with the hands leaving the
+ * frame is taken as the hands dropping after the sign, not as a new sign.
  * Motion is measured in shoulder widths per second, so it does not depend on
  * how far the signer sits from the camera or on the frame rate.
  */
@@ -31,6 +33,11 @@ export interface SegmenterOptions {
   maxMs: number;
   /** Frames with hands just before motion starts are kept (hands entering). */
   prerollMs: number;
+  /**
+   * A segment that starts from a still hold and ends with the hands leaving
+   * in less than this is the hands dropping after a held sign; it is discarded.
+   */
+  leaveMs: number;
 }
 
 export const DEFAULT_SEGMENTER: SegmenterOptions = {
@@ -39,6 +46,7 @@ export const DEFAULT_SEGMENTER: SegmenterOptions = {
   minFrames: 8,
   maxMs: 4000,
   prerollMs: 200,
+  leaveMs: 500,
 };
 
 export interface Segment {
@@ -54,7 +62,7 @@ export type EndReason = 'absent' | 'still' | 'max' | 'flush';
 export type SegmentEvent =
   | { type: 'start'; t: number }
   | { type: 'end'; reason: EndReason; segment: Segment }
-  | { type: 'discard'; reason: 'too-short' };
+  | { type: 'discard'; reason: 'too-short' | 'hands-leaving' };
 
 export type SegmenterState = 'idle' | 'signing' | 'resting';
 
@@ -95,6 +103,8 @@ export class Segmenter {
   private speed = 0;
   private quietSince: number | null = null;
   private quietReason: 'absent' | 'still' = 'absent';
+  /** The open segment started from a still hold (state 'resting'). */
+  private fromRest = false;
   state: SegmenterState = 'idle';
 
   constructor(options: Partial<SegmenterOptions> = {}) {
@@ -107,6 +117,7 @@ export class Segmenter {
     this.last = null;
     this.speed = 0;
     this.quietSince = null;
+    this.fromRest = false;
     this.state = 'idle';
   }
 
@@ -129,6 +140,7 @@ export class Segmenter {
         ? [...this.recent, sample].filter((s) => t - s.t <= this.opts.prerollMs)
         : [];
       if (!moving) return null;
+      this.fromRest = this.state === 'resting';
       this.state = 'signing';
       this.samples = [...this.recent];
       this.quietSince = null;
@@ -155,6 +167,14 @@ export class Segmenter {
     const quietStart = this.quietSince;
     const keep = this.samples.filter((s) => s.t < quietStart).length;
     const reason = this.quietReason;
+    if (reason === 'absent' && this.fromRest) {
+      const kept = this.samples.slice(0, keep);
+      const span = (kept[kept.length - 1]?.t ?? 0) - (kept[0]?.t ?? 0);
+      if (span < this.opts.leaveMs) {
+        this.finish(reason, 0);
+        return { type: 'discard', reason: 'hands-leaving' };
+      }
+    }
     const event = this.finish(reason, reason === 'still' ? keep + 1 : keep);
     this.state = present ? 'resting' : 'idle';
     return event;

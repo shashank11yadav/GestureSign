@@ -85,6 +85,24 @@ describe('Segmenter', () => {
     expect(more).toEqual([]);
   });
 
+  it('takes a quick exit after a held sign as the hands dropping, not a new sign', () => {
+    const seg = new Segmenter();
+    const held = run(seg, [...moving(20), ...still(30, 0.5)]);
+    expect(held.map((e) => e.type)).toEqual(['start', 'end']);
+    const dropped = run(seg, [...moving(10, 20), ...absent(12)], 50 * DT);
+    expect(dropped).toEqual([
+      { type: 'start', t: expect.any(Number) as number },
+      { type: 'discard', reason: 'hands-leaving' },
+    ]);
+  });
+
+  it('still reads a full sign that starts from a still hold and ends out of frame', () => {
+    const seg = new Segmenter();
+    run(seg, [...moving(20), ...still(30, 0.5)]);
+    const next = run(seg, [...moving(24, 20), ...absent(12)], 50 * DT);
+    expect(next.map((e) => e.type)).toEqual(['start', 'end']);
+  });
+
   it('discards movements too short to be a sign', () => {
     const seg = new Segmenter();
     const events = run(seg, [...moving(4), ...absent(12)]);

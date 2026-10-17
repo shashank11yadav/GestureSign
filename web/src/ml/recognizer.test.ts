@@ -83,6 +83,15 @@ describe('Recognizer', () => {
     expect(result.result.decision.reason).toBe('partial');
   });
 
+  it('says "partial" for a short sign too, ignoring the empty frames that end it', async () => {
+    // 9 framed frames, then the 300 ms of empty frames that end the sign: the
+    // empty frames must not outvote the partly framed ones.
+    const events = await drive([...sign(false).slice(0, 9), ...gone(12)], confidentAt(1));
+    const result = events.find((e) => e.type === 'result');
+    if (result?.type !== 'result') throw new Error('no result');
+    expect(result.result.decision.reason).toBe('partial');
+  });
+
   it('says "not sure" below the calibrated threshold', async () => {
     const flat: Infer = () =>
       Promise.resolve({
