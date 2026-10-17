@@ -20,9 +20,6 @@ export interface LoadedModel {
   client: ModelClient;
 }
 
-/** Prefer WebGPU when the browser has it; the worker falls back to WASM on its own. */
-export const PREFER_WEBGPU = true;
-
 function siteUrl(path: string): string {
   return new URL(`${import.meta.env.BASE_URL}${path}`, window.location.origin).href;
 }
@@ -38,6 +35,53 @@ async function fetchJson(path: string): Promise<unknown> {
   return response.json();
 }
 
+let metaRequest: Promise<ModelMeta> | null = null;
+
+/**
+ * model-meta.json, fetched once and shared: the landmark worker needs its
+ * feature set while the model is still loading. A failed request is retried
+ * on the next call.
+ */
+export function loadMeta(): Promise<ModelMeta> {
+  if (!metaRequest) {
+    const request = fetchJson('models/model-meta.json').then(parseMeta);
+    metaRequest = request;
+    request.catch(() => {
+      if (metaRequest === request) metaRequest = null;
+    });
+  }
+  return metaRequest;
+}
+
+/** Starts the worker, which downloads the model and the WASM runtime in parallel. */
+function startWorker(worker: Worker): Promise<void> {
+  return new Promise<ModelWorkerOut>((resolve, reject) => {
+    worker.onmessage = (event: MessageEvent<ModelWorkerOut>) => {
+      resolve(event.data);
+    };
+    worker.onerror = (event) => {
+      reject(new ModelLoadError(event.message || 'the model worker failed to start'));
+    };
+    const msg: ModelWorkerIn = {
+      type: 'load',
+      modelUrl: siteUrl('models/model.onnx'),
+      wasmPaths: siteUrl('vendor/ort/'),
+    };
+    worker.postMessage(msg);
+  }).then((loaded) => {
+    if (loaded.type === 'load-error') {
+      const what =
+        loaded.status !== null
+          ? `The model file could not be downloaded (${loaded.message}).`
+          : `The model could not be started: ${loaded.message}`;
+      throw new ModelLoadError(what, loaded.status);
+    }
+    if (loaded.type !== 'loaded') {
+      throw new ModelLoadError('The model worker sent an unexpected reply.');
+    }
+  });
+}
+
 export class ModelClient {
   private nextId = 1;
   private readonly pending = new Map<
@@ -45,11 +89,7 @@ export class ModelClient {
     { resolve: (r: Inference & { ms: number }) => void; reject: (e: Error) => void }
   >();
 
-  private constructor(
-    private readonly worker: Worker,
-    readonly backend: 'webgpu' | 'wasm',
-    readonly fallbackReason: string | null,
-  ) {
+  private constructor(private readonly worker: Worker) {
     worker.onmessage = (event: MessageEvent<ModelWorkerOut>) => {
       const msg = event.data;
       if (msg.type !== 'result' && msg.type !== 'run-error') return;
@@ -65,44 +105,21 @@ export class ModelClient {
   }
 
   static async load(): Promise<LoadedModel> {
-    const [rawMeta, rawLabels] = await Promise.all([
-      fetchJson('models/model-meta.json'),
-      fetchJson('models/labels.json'),
-    ]);
-    const meta = parseMeta(rawMeta);
-    const labels = parseLabels(rawLabels, meta.classes);
+    // The worker starts downloading straight away, alongside the two small JSON files.
     const worker = new Worker(new URL('./model.worker.ts', import.meta.url), { type: 'module' });
-    const loaded = await new Promise<ModelWorkerOut>((resolve, reject) => {
-      worker.onmessage = (event: MessageEvent<ModelWorkerOut>) => {
-        resolve(event.data);
-      };
-      worker.onerror = (event) => {
-        reject(new ModelLoadError(event.message || 'the model worker failed to start'));
-      };
-      const msg: ModelWorkerIn = {
-        type: 'load',
-        modelUrl: siteUrl('models/model.onnx'),
-        wasmPaths: siteUrl('vendor/ort/'),
-        preferWebGpu: PREFER_WEBGPU,
-      };
-      worker.postMessage(msg);
-    }).catch((error: unknown) => {
+    const started = startWorker(worker);
+    try {
+      const [meta, rawLabels] = await Promise.all([
+        loadMeta(),
+        fetchJson('models/labels.json'),
+        started,
+      ]);
+      const labels = parseLabels(rawLabels, meta.classes);
+      return { meta, labels, client: new ModelClient(worker) };
+    } catch (error) {
       worker.terminate();
       throw error;
-    });
-    if (loaded.type === 'load-error') {
-      worker.terminate();
-      const what =
-        loaded.status !== null
-          ? `The model file could not be downloaded (${loaded.message}).`
-          : `The model could not be started: ${loaded.message}`;
-      throw new ModelLoadError(what, loaded.status);
     }
-    if (loaded.type !== 'loaded') {
-      worker.terminate();
-      throw new ModelLoadError('The model worker sent an unexpected reply.');
-    }
-    return { meta, labels, client: new ModelClient(worker, loaded.backend, loaded.fallbackReason) };
   }
 
   infer(input: ModelInput): Promise<Inference & { ms: number }> {

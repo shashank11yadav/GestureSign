@@ -1,10 +1,13 @@
 /**
- * Runs the ONNX model off the main thread. WebGPU is used when the browser
- * offers an adapter and the session builds; otherwise (or if WebGPU fails at
- * any point while loading) the plain WASM backend is used. The WASM runtime is
- * loaded from this site (public/vendor/ort), never from a CDN.
+ * Runs the ONNX model off the main thread with ONNX Runtime's WebAssembly
+ * backend. The model has about 1.4 M parameters and runs in a few
+ * milliseconds on a CPU, so a GPU backend would not make it noticeably faster
+ * and would add a much larger runtime download.
+ *
+ * The model file and the runtime's WASM binary are downloaded in parallel,
+ * both from this site (public/models, public/vendor/ort), never from a CDN.
  */
-import type * as Ort from 'onnxruntime-web';
+import * as ort from 'onnxruntime-web/wasm';
 import type { ModelWorkerIn, ModelWorkerOut } from './model-protocol';
 
 interface WorkerScope {
@@ -13,76 +16,59 @@ interface WorkerScope {
 }
 const scope = self as unknown as WorkerScope;
 
-type OrtModule = typeof Ort;
-type Backend = 'webgpu' | 'wasm';
+/** The SIMD build, run single-threaded: GitHub Pages cannot send the headers threads need. */
+const WASM_FILE = 'ort-wasm-simd-threaded.wasm';
 
-let session: Ort.InferenceSession | null = null;
-let ort: OrtModule | null = null;
+let session: ort.InferenceSession | null = null;
 
-async function loadRuntime(backend: Backend, wasmPaths: string): Promise<OrtModule> {
-  const mod: OrtModule =
-    backend === 'webgpu'
-      ? await import('onnxruntime-web/webgpu')
-      : await import('onnxruntime-web/wasm');
-  mod.env.wasm.wasmPaths = wasmPaths;
-  // GitHub Pages cannot send the cross-origin isolation headers threads need.
-  mod.env.wasm.numThreads = 1;
-  mod.env.logLevel = 'error';
-  return mod;
-}
-
-async function hasWebGpu(): Promise<boolean> {
-  if (!('gpu' in navigator)) return false;
-  try {
-    return (await navigator.gpu.requestAdapter()) !== null;
-  } catch {
-    return false;
+class HttpError extends Error {
+  constructor(readonly status: number) {
+    super(`HTTP ${status}`);
   }
 }
 
-async function createSession(backend: Backend, bytes: Uint8Array, wasmPaths: string) {
-  const mod = await loadRuntime(backend, wasmPaths);
-  const created = await mod.InferenceSession.create(bytes, {
-    executionProviders: [backend],
-    graphOptimizationLevel: 'all',
-    logSeverityLevel: 3,
-  });
-  return { mod, created };
+async function download(url: string): Promise<Uint8Array> {
+  const response = await fetch(url);
+  if (!response.ok) throw new HttpError(response.status);
+  return new Uint8Array(await response.arrayBuffer());
 }
 
-async function load(modelUrl: string, wasmPaths: string, preferWebGpu: boolean): Promise<void> {
-  const response = await fetch(modelUrl);
-  if (!response.ok) {
+async function load(modelUrl: string, wasmPaths: string): Promise<void> {
+  // Settle both downloads before reporting, so a failure in one is never left unhandled.
+  const [model, wasm] = await Promise.allSettled([
+    download(modelUrl),
+    download(`${wasmPaths}${WASM_FILE}`),
+  ]);
+  if (model.status === 'rejected') {
+    const error: unknown = model.reason;
     scope.postMessage({
       type: 'load-error',
-      message: `HTTP ${response.status}`,
-      status: response.status,
+      message: error instanceof Error ? error.message : String(error),
+      status: error instanceof HttpError ? error.status : null,
     });
     return;
   }
-  const bytes = new Uint8Array(await response.arrayBuffer());
-  let backend: Backend = 'wasm';
-  let fallbackReason: string | null = null;
-  if (preferWebGpu && (await hasWebGpu())) {
-    try {
-      const { mod, created } = await createSession('webgpu', bytes, wasmPaths);
-      ort = mod;
-      session = created;
-      backend = 'webgpu';
-    } catch (error) {
-      fallbackReason = error instanceof Error ? error.message : String(error);
-    }
+  if (wasm.status === 'rejected') {
+    const error: unknown = wasm.reason;
+    throw new Error(
+      `the WebAssembly runtime could not be downloaded (${error instanceof Error ? error.message : String(error)})`,
+    );
   }
-  if (!session) {
-    const { mod, created } = await createSession('wasm', bytes, wasmPaths);
-    ort = mod;
-    session = created;
-  }
-  scope.postMessage({ type: 'loaded', backend, fallbackReason });
+  // The glue script still comes from wasmPaths; the binary is the one downloaded above.
+  ort.env.wasm.wasmPaths = wasmPaths;
+  ort.env.wasm.wasmBinary = wasm.value;
+  ort.env.wasm.numThreads = 1;
+  ort.env.logLevel = 'error';
+  session = await ort.InferenceSession.create(model.value, {
+    executionProviders: ['wasm'],
+    graphOptimizationLevel: 'all',
+    logSeverityLevel: 3,
+  });
+  scope.postMessage({ type: 'loaded' });
 }
 
 async function run(id: number, data: Float32Array, frames: number, dim: number): Promise<void> {
-  if (!session || !ort) throw new Error('model not loaded');
+  if (!session) throw new Error('model not loaded');
   const started = performance.now();
   const input = new ort.Tensor('float32', data, [1, frames, dim]);
   const outputs = await session.run({ frames: input });
@@ -105,7 +91,7 @@ async function run(id: number, data: Float32Array, frames: number, dim: number):
 scope.onmessage = (event) => {
   const msg = event.data;
   if (msg.type === 'load') {
-    load(msg.modelUrl, msg.wasmPaths, msg.preferWebGpu).catch((error: unknown) => {
+    load(msg.modelUrl, msg.wasmPaths).catch((error: unknown) => {
       scope.postMessage({
         type: 'load-error',
         message: error instanceof Error ? error.message : String(error),

@@ -7,7 +7,6 @@ const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
 
 export function HowItWorks({ model }: { model: ModelState }) {
   const meta = model.status === 'ready' ? model.model.meta : null;
-  const backend = model.status === 'ready' ? model.model.client.backend : null;
   const lips = meta?.featureSet !== 'hands_pose';
   const steps = [
     {
@@ -25,7 +24,7 @@ export function HowItWorks({ model }: { model: ModelState }) {
     {
       icon: BrainCircuit,
       title: 'Model',
-      body: `A 1.4 M-parameter convolution + transformer reads up to ${meta?.maxFrames ?? 64} frames. It runs with ONNX Runtime ${backend === 'webgpu' ? 'on WebGPU' : backend === 'wasm' ? 'in WebAssembly' : 'in the browser'}.`,
+      body: `A 1.4 M-parameter convolution + transformer reads up to ${meta?.maxFrames ?? 64} frames. It runs with ONNX Runtime in WebAssembly, in a second worker.`,
     },
     {
       icon: Gauge,

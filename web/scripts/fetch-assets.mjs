@@ -4,7 +4,9 @@
 //     versions and checked against pinned SHA-256 hashes (a mismatch fails the
 //     build);
 //   - the MediaPipe and onnxruntime WASM runtimes, copied from node_modules,
-//     whose versions package-lock.json pins.
+//     whose versions package-lock.json pins. Only onnxruntime's plain WASM
+//     build ships (no WebGPU/JSEP builds): the model is small enough that the
+//     CPU runs it in a few milliseconds.
 //
 // Which landmarker ships follows the model's feature set in
 // public/models/model-meta.json (decided by the A1 benchmark): Holistic for
@@ -51,8 +53,6 @@ const COPIES = [
   ['@mediapipe/tasks-vision/wasm/vision_wasm_module_internal.wasm', 'mediapipe/wasm'],
   ['onnxruntime-web/dist/ort-wasm-simd-threaded.mjs', 'ort'],
   ['onnxruntime-web/dist/ort-wasm-simd-threaded.wasm', 'ort'],
-  ['onnxruntime-web/dist/ort-wasm-simd-threaded.asyncify.mjs', 'ort'],
-  ['onnxruntime-web/dist/ort-wasm-simd-threaded.asyncify.wasm', 'ort'],
 ];
 
 // Classic (non-module) MediaPipe glue, only for the main-thread benchmark page.
@@ -111,6 +111,8 @@ async function main() {
       await rm(join(VENDOR, folder, source.split('/').pop()), { force: true });
     }
   }
+  // Start the onnxruntime folder afresh, so runtimes that no longer ship do not linger.
+  await rm(join(VENDOR, 'ort'), { recursive: true, force: true });
   for (const [source, folder] of bench ? [...COPIES, ...BENCH_COPIES] : COPIES) {
     const from = join(ROOT, 'node_modules', source);
     const to = join(VENDOR, folder, source.split('/').pop());

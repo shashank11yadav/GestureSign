@@ -67,6 +67,8 @@ jobs:
         run: npm run build
       - name: The production build has no test hook
         run: '! grep -rl "__gesturesignTest" dist'
+      - name: The production build ships only the WebAssembly runtime (no WebGPU or JSEP build)
+        run: '! find dist -iname "*jsep*" -o -iname "*asyncify*" -o -iname "*webgpu*" | grep .'
       - name: End-to-end tests
         run: npx playwright install --with-deps chromium && npm run test:e2e
       - name: Audit production dependencies
