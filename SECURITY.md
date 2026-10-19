@@ -18,11 +18,16 @@ the device, so the realistic risks are in the build and supply chain:
 - GitHub Actions are pinned to commit SHAs and run with `contents: read` unless
   a job needs more (Pages deploy, CodeQL upload).
 - The MediaPipe `.task` models are downloaded at build time by
-  `web/scripts/fetch-assets.mjs` and checked against pinned SHA-256 hashes; a
-  mismatch fails the build. The MediaPipe and onnxruntime WASM files are copied
+  `web/scripts/fetch-assets.mjs` and checked against a pinned size and SHA-256
+  before anything is written to disk; a mismatch fails the build. The MediaPipe and onnxruntime WASM files are copied
   from the locked npm packages, so the site serves every file itself.
 - The page ships a Content-Security-Policy that allows only same-origin
   scripts, styles, workers and fetches. `'wasm-unsafe-eval'` is the one
   relaxation, and it is required to compile WebAssembly.
 - Custom gestures taught in the demo are stored as embedding vectors in the
   browser's IndexedDB, never as video, and can be cleared from the page.
+  Stored records, replay clips and worker messages are validated before use,
+  and the workers build their own same-origin download URLs.
+- The training pipeline loads checkpoints with `torch.load(weights_only=True)`
+  and cache shards with `allow_pickle=False`, so a checkpoint or cache from
+  elsewhere cannot run code.

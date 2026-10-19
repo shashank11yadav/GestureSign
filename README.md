@@ -1,28 +1,33 @@
 # GestureSign
 
-Live American Sign Language recognition in the browser. Sign to your webcam
-and see the top three guesses for 250 isolated ASL signs, practise a sign and
-get a score, or teach the demo your own gestures in a few takes. Hand tracking
-and the model both run on your device; no video leaves the page.
+Live American Sign Language recognition in the browser. You sign to your
+webcam and the page shows its top three guesses for 250 isolated ASL signs.
+There is also a practice mode that scores an attempt at a given sign, and a
+"teach your own" mode that learns a new gesture from a few takes. Hand
+tracking and the model both run on your device, and no video leaves the page.
 
 **Try it:** https://shashank11yadav.github.io/GestureSign/
+
+Built by [Shashank Yadav](https://github.com/shashank11yadav).
 
 ![Replay mode playing four held-out asl-signs clips (blue, smile, giraffe, hello) through the trained model, with the top three guesses for each](docs/demo.gif)
 
 *Replay mode: real clips from signers the model never trained on, played as
 landmarks (no video) through the same recogniser as the camera.*
 
-**Held-out signers:** 72.1% top-1 and 88.1% top-5 over all 250 signs
-(14,396 clips from 3 people the model never saw). Teach-your-own: 88.7%
-(8 gestures, 3 takes each). Details in [Results](#results).
+On the three held-out signers the model gets 72.1% top-1 and 88.1% top-5
+over all 250 signs (14,396 clips). Teach your own picks the right gesture
+88.7% of the time with 8 gestures of 3 takes each. The details are in
+[Results](#results).
 
 ## How it works
 
 The model reads body landmarks, not pixels. MediaPipe turns each camera frame
-into coordinates for the hands, upper body and lips; a 1.4 M-parameter
-convolution + transformer classifies the sequence. Landmarks make the model
-largely indifferent to lighting, background, skin tone and camera quality, and
-small enough to run in a browser tab.
+into coordinates for the hands, upper body and lips, and a 1.4 M-parameter
+convolution + transformer classifies the sequence. I went with landmarks
+because they make the model much less sensitive to lighting, background,
+skin tone and camera quality, and because a model over landmarks is small
+enough to run in a browser tab.
 
 ```mermaid
 flowchart LR
@@ -60,55 +65,58 @@ flowchart LR
 
 | Mode | What happens |
 |---|---|
-| **Recognise** | Sign continuously. Each sign is cut out of the stream when your hands leave the frame or hold still for 300 ms, and the top three guesses are shown with their confidence, plus a strip of recent signs. |
-| **Practice** | The page picks a sign (with a link to an ASL dictionary entry) and scores your attempt by how strongly the model saw that sign. |
-| **Teach your own** | Record 3 to 5 takes of up to 8 gestures. They are recognised by nearest prototype on the model's embeddings, so this works for anyone, whether or not they sign ASL. Stored in this browser only. |
-| **Replay** | No camera, or rather not use one? Replay six held-out clips from the dataset through the same recogniser. Only landmarks are bundled, so no one's face or video is shown. |
+| Recognise | Sign continuously. A sign ends when your hands leave the frame or hold still for 300 ms; the page then shows the top three guesses with their confidence and adds the sign to a strip of recent ones. |
+| Practice | The page picks a sign (with a link to its entry in an ASL dictionary) and scores your attempt by how strongly the model saw that sign. |
+| Teach your own | Record 3 to 5 takes each of up to 8 gestures. New attempts are matched to the nearest prototype in the model's embedding space, so this works for any gesture, ASL or not. The takes are stored in your browser only. |
+| Replay | For when you have no camera or would rather not use one: six held-out clips from the dataset go through the same recogniser. Only landmarks are bundled, so nobody's face or video is shown. |
 
 Below a confidence threshold calibrated on signers the model never saw, the
-page says **"Not sure"** instead of naming a sign. It also refuses to guess
-when nobody is in view or when only part of the signer is visible.
+page answers "Not sure" instead of naming a sign. It also won't guess when
+nobody is in view or when only part of the signer is visible.
 
 ## Design decisions
 
-- **Feature set chosen by measurement.** Before any training, MediaPipe
-  Holistic (hands, pose and face mesh) had to sustain 15 fps in Chrome on an
-  M4 with DevTools CPU throttling at 4x, a stand-in for a mid-range laptop;
-  otherwise the demo would have used the Hand and Pose landmarkers and no lip
-  features. Holistic ran at a median of **16.8 fps**, so the model sees hands,
-  upper-body pose and 40 lip points.
-  [`pipeline/reports/bench.md`](pipeline/reports/bench.md) has the numbers and
-  `npm run bench` reproduces them.
-- **WebAssembly only.** The model is small (1.4 M parameters) and runs in a
-  few milliseconds on a CPU, so ONNX Runtime's WebGPU build would not make it
-  noticeably faster, while it would add a 27 MB runtime whose loader needs a
-  looser Content-Security-Policy. The site ships only the plain WASM runtime,
-  and CI checks that no other build reaches `dist/`.
-- **Fast first visit.** On page load the sign model and MediaPipe start
-  loading in two workers in parallel, and each worker downloads its model file
-  and its WASM runtime in parallel. The camera itself still waits for a
-  click. A first visit downloads about 48 MB (mostly the two WASM runtimes and
-  the Holistic model).
-- **Train/serve parity.** Features are implemented twice, in Python
-  (`pipeline/src/gesturesign/features.py`) and TypeScript
+- **I picked the landmark set by measuring it first.** Before training
+  anything I set a bar: MediaPipe Holistic (hands, pose and face mesh) had to
+  sustain 15 fps in Chrome on my M4 with DevTools CPU throttling at 4x, as a
+  stand-in for a mid-range laptop. If it missed, the demo would use the Hand
+  and Pose landmarkers and drop the lip features. Holistic ran at a median of
+  16.8 fps, so the model sees hands, upper-body pose and 40 lip points.
+  [`pipeline/reports/bench.md`](pipeline/reports/bench.md) has the numbers,
+  and `npm run bench` reproduces them.
+- **WebAssembly only.** The model has 1.4 M parameters and runs in a few
+  milliseconds on a CPU, so ONNX Runtime's WebGPU build wouldn't make it
+  noticeably faster. It would add a 27 MB runtime, though, and its loader
+  needs a looser Content-Security-Policy. The site ships only the plain WASM
+  runtime, and CI fails if any other build ends up in `dist/`.
+- **Start loading before the click.** On page load the sign model and
+  MediaPipe start loading in two workers in parallel, and each worker fetches
+  its model file and its WASM runtime in parallel too. The camera still waits
+  for a click. A first visit downloads about 48 MB, mostly the two WASM
+  runtimes and the Holistic model.
+- **Train/serve parity.** The features exist twice,
+  in Python (`pipeline/src/gesturesign/features.py`) and TypeScript
   (`web/src/ml/features.ts`). Both test suites check the same fixture,
   [`shared/fixtures/features.json`](shared/fixtures/features.json), to within
   1e-4, including mirrored clips, a different camera aspect ratio, other frame
   rates and clips longer than the model's window.
-- **Handedness and mirroring.** The signing hand is always placed in the same
-  slot, mirroring the clip if needed. Left-handed signers and mirrored or
-  unmirrored cameras therefore look the same to the model.
-- **Camera aspect ratio.** MediaPipe normalises x by width and y by height, so a
-  landscape webcam stretches vertical distances relative to the portrait phone
-  videos of the training data by about 1.8x. Features divide y by the face's
-  vertical proportion, which cancels the camera's aspect ratio.
+- **Handedness and mirroring.** The signing hand always goes in the same
+  slot, and the clip is mirrored if needed, so left-handed signers and
+  mirrored or unmirrored cameras look the same to the model.
+- **The portrait-vs-landscape stretch.** This one cost me a feature version.
+  MediaPipe normalises x by the image width and y by its height. The training
+  videos are portrait phone selfies and webcams are landscape, so a webcam
+  stretched every vertical distance by about 1.8x compared with training. I
+  now scale y by the face's vertical proportion (eye-to-mouth over
+  ear-to-ear, from pose points), which cancels the camera's aspect ratio.
 - **Signer-independent evaluation.** Three participants are held out for
-  testing and two for validation; no clip of theirs is used in training or in
-  choosing the checkpoint, the shipped set or the thresholds.
-- **What ships.** If the full 250-sign set had missed 60% top-1 on held-out
-  signers, the demo would ship the largest subset that reaches it, chosen on
-  the validation signers and reported on the test signers. The full set
-  reached 74.4% on the validation signers, so **all 250 signs ship**.
+  testing and two for validation. None of their clips is used for training or
+  for choosing the checkpoint, the shipped sign set or the thresholds.
+- **What ships.** I decided up front that if the full 250-sign set scored
+  under 60% top-1 on held-out signers, the demo would ship the largest subset
+  that reached 60%, chosen on the validation signers and reported on the test
+  signers. The full set reached 74.4% on the validation signers, so all 250
+  signs ship.
 
 ## Results
 
@@ -140,27 +148,28 @@ Teach your own (8-way, 3-shot, cosine nearest prototype on test-signer embedding
 | pen -> pencil | 17 | 27% |
 <!-- /metrics -->
 
-Every number in this section is produced by `uv run gesturesign evaluate`,
-which writes [`pipeline/reports/metrics.json`](pipeline/reports/metrics.json)
-and the tables above (`pipeline/reports/metrics.md`).
+Every number in this section comes from `uv run gesturesign evaluate`, which
+writes [`pipeline/reports/metrics.json`](pipeline/reports/metrics.json) and
+the tables above (`pipeline/reports/metrics.md`).
 
 In short:
 
-- **Held-out top-1 72.1%, top-5 88.1%** over all 250 signs. The demo shows
-  three guesses, and the right sign is among them 85.3% of the time.
-- **"Not sure"** is said below a calibrated confidence of 0.29. The demo then
+- Held-out top-1 is 72.1% and top-5 is 88.1% over all 250 signs. The demo
+  shows three guesses, and the right sign is among them 85.3% of the time.
+- The page says "Not sure" below a calibrated confidence of 0.29. It still
   answers 92% of held-out clips, and 77.1% of those answers are right.
-- **Teach your own** picks the right gesture 88.7% of the time with 8
-  gestures of 3 takes each (1,000 random episodes on held-out signers).
+- Teach your own picks the right gesture 88.7% of the time with 8 gestures of
+  3 takes each (1,000 random episodes on held-out signers).
 
-**Most confusions are near-synonyms.** The model mixes up signs that look
-almost the same or mean almost the same thing: *awake* and *wake*, *quiet* and
-*shhh*, *sleep* and *nap*, *pen* and *pencil* (both ways), *mouth* and *lips*.
-Most of the rest are made at the same place with a similar hand, such as
-*cry* and *cheek* (index fingers at the cheeks), *brother* and *boy*
-(*brother* begins with the sign for *boy*), *finger* and *wait*, and *lamp* and
-*snack*. Since the page shows three guesses, the intended sign is usually
-still on screen when the first guess is its look-alike.
+Most of the confusions are near-synonyms, which I find reassuring: the model
+mixes up signs that look almost the same or mean almost the same thing, like
+*awake* and *wake*, *quiet* and *shhh*, *sleep* and *nap*, *pen* and *pencil*
+(both ways) and *mouth* and *lips*. Most of the rest are made at the same
+place with a similar hand: *cry* and *cheek* (index fingers at the cheeks),
+*brother* and *boy* (*brother* begins with the sign for *boy*), *finger* and
+*wait*, and *lamp* and *snack*. Because the page shows three guesses, the
+intended sign is usually still on screen when the first guess is its
+look-alike.
 
 <details>
 <summary>The 250 signs that ship</summary>
@@ -193,8 +202,8 @@ and in [`web/public/models/labels.json`](web/public/models/labels.json).
   and hands), early stopping on validation top-1. The run stopped after 47
   epochs; the checkpoint from epoch 39 ships. Fixed seed (42).
 - **Intended use:** learning and practising ASL vocabulary, and showing how
-  on-device sign recognition works. It is **not** an interpreter, and it
-  should not be used where a misrecognised sign could matter, such as
+  on-device sign recognition works. It is not an interpreter, and it should
+  not be used where a misrecognised sign could matter, such as
   accessibility-critical communication.
 - **Limitations:**
   - Isolated signs only: no fingerspelling, grammar or sentences.
@@ -204,25 +213,41 @@ and in [`web/public/models/labels.json`](web/public/models/labels.json).
     theirs are less well covered.
   - Lighting still matters indirectly: in dim or back-lit scenes MediaPipe
     loses the hands, and the model only sees what MediaPipe finds.
-  - The training videos are portrait phone selfies; webcams are usually
-    landscape. Features cancel the aspect ratio using the face's proportions,
-    which works for a typical framing but not for every camera position.
-  - Near-synonym and look-alike signs are confused (see above). Facial
+  - The aspect-ratio correction uses the face's proportions, which works for
+    a typical framing but not for every camera position.
+  - Near-synonym and look-alike signs get confused (see above), and facial
     grammar beyond the lips is not modelled.
-  - It is not a substitute for a human interpreter.
 - **Privacy:** everything runs on the visitor's device. The camera starts only
-  after a click and stops when the tab is hidden; frames are processed in the
-  page and never uploaded. There is no server, account, cookie or analytics.
-  Taught gestures are stored as embedding vectors (numbers, not images) in
-  IndexedDB in the browser, and the page's Clear button removes them. A strict
-  Content-Security-Policy allows only this site's own scripts, workers and
-  files (plus `'wasm-unsafe-eval'`, which WebAssembly needs).
+  after a click and stops when the tab is hidden or closed; frames are
+  processed in the page and never uploaded. There is no server, account,
+  cookie or analytics. Taught gestures are stored as embedding vectors
+  (numbers, not images) in the browser's IndexedDB, and the page's Clear
+  button removes them. The Content-Security-Policy allows only this site's own
+  scripts, workers and files, plus `'wasm-unsafe-eval'`, which WebAssembly
+  needs.
+
+## What I'd do next
+
+- **Collect webcam data.** Every training clip is a portrait phone selfie,
+  and the aspect-ratio fix is a correction for that gap rather than a cure.
+  A few hundred landscape webcam clips per sign from new signers would tell
+  me how much accuracy the demo loses to the camera change, and fine-tuning
+  on them would close some of it.
+- **Use the confusion pairs.** *awake*/*wake* and *pen*/*pencil* are
+  confused in both directions. I'd like to try grouping near-synonyms when
+  scoring Practice mode, and a margin loss on the worst pairs in training.
+- **Ensemble or distil.** The strongest asl-signs competition entries
+  ensembled several models. A bigger teacher distilled into the current
+  1.4 M-parameter size might lift top-1 without slowing the page down.
+- **Fingerspelling.** A separate model for letters would cover names and
+  any word outside the 250 signs.
 
 ## Run it locally
 
 ### Web app only
 
-Requires Node 24. The trained model is committed, so no Python is needed.
+Requires Node 24 (what CI uses). The trained model is committed, so you don't
+need Python.
 
 ```sh
 cd web
@@ -230,9 +255,9 @@ npm ci
 npm run dev        # http://localhost:5330/GestureSign/
 ```
 
-`npm run build` fetches the MediaPipe model at a pinned version, checks its
-SHA-256 and copies the WASM runtimes from `node_modules`, so the site serves
-every file itself. Other scripts:
+`npm run build` downloads the MediaPipe model at a pinned version, checks its
+size and SHA-256 before writing it, and copies the WASM runtimes from
+`node_modules`, so the site serves every file itself. Other scripts:
 
 | Script | What it does |
 |---|---|
@@ -246,9 +271,10 @@ every file itself. Other scripts:
 
 Requires Python 3.12 and [uv](https://docs.astral.sh/uv/). Download the
 [Kaggle asl-signs](https://www.kaggle.com/competitions/asl-signs/data) data
-(accept the competition rules first) to `../_datasets/asl-signs/asl-signs.zip`
-next to this repository. The pipeline reads the zip directly, so there is no
-need to extract its 56 GB. `--data-dir` or `$DATA_DIR` can point elsewhere.
+(you have to accept the competition rules first) to
+`../_datasets/asl-signs/asl-signs.zip`, next to this repository. The pipeline
+reads the zip directly, so you don't need the 56 GB it takes extracted.
+`--data-dir` or `$DATA_DIR` can point elsewhere.
 
 ```sh
 cd pipeline
@@ -260,10 +286,10 @@ uv run gesturesign export       # web/public/models/{model.onnx, model-meta.json
 uv run gesturesign replay-clips # the held-out clips for Replay mode
 ```
 
-The times are from the run that produced the committed model, on an Apple M4
+The times are from the run that produced the committed model, on my Apple M4
 (10-core CPU and GPU, 16 GB). `prepare` is resumable, and `train` stops early
-once validation top-1 has not improved for 8 epochs. Configuration and the
-fixed seed live in [`pipeline/configs/default.toml`](pipeline/configs/default.toml).
+once validation top-1 hasn't improved for 8 epochs. The configuration and the
+fixed seed are in [`pipeline/configs/default.toml`](pipeline/configs/default.toml).
 
 `uv run gesturesign smoke` runs the whole chain on synthetic data in seconds,
 and `uv run gesturesign export --stub` writes an untrained model with the same

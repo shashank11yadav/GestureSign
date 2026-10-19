@@ -11,7 +11,7 @@ import { SiteHeader } from './components/SiteHeader';
 import { Stage } from './components/Stage';
 import { TeachPanel } from './components/TeachPanel';
 import { Card } from './components/ui';
-import { DATASET_CREDIT, REPO_URL } from './links';
+import { AUTHOR_URL, DATASET_CREDIT, REPO_URL } from './links';
 
 export function App({ session }: { session: Session }) {
   const snap = useSyncExternalStore(session.subscribe, session.getSnapshot);
@@ -103,7 +103,11 @@ export function App({ session }: { session: Session }) {
       <footer className="border-t border-line">
         <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-6 text-sm text-ink-muted sm:flex-row sm:justify-between">
           <p>
-            GestureSign ·{' '}
+            GestureSign by{' '}
+            <a href={AUTHOR_URL} className="underline underline-offset-2">
+              Shashank Yadav
+            </a>{' '}
+            ·{' '}
             <a href={REPO_URL} className="underline underline-offset-2">
               source
             </a>{' '}
