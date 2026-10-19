@@ -65,8 +65,11 @@ test.describe('start-up', () => {
     errors,
   }) => {
     const requested: string[] = [];
+    const origins = new Set<string>();
     page.context().on('request', (request) => {
-      requested.push(new URL(request.url()).pathname);
+      const url = new URL(request.url());
+      requested.push(url.pathname);
+      if (url.protocol !== 'data:' && url.protocol !== 'blob:') origins.add(url.origin);
     });
     await openReady(page);
     // MediaPipe starts before any click, so the camera's first frame is tracked at once.
@@ -78,11 +81,13 @@ test.describe('start-up', () => {
     expect(count('/models/model.onnx')).toBe(1);
     expect(count('/vendor/ort/ort-wasm-simd-threaded.wasm')).toBe(1);
     expect(requested.filter((p) => /jsep|asyncify|webgpu/i.test(p))).toEqual([]);
+    // Every file comes from the site itself: no CDN, font host or analytics.
+    expect([...origins]).toEqual([new URL(page.url()).origin]);
     expect(errors).toEqual([]);
   });
 });
 
-test.describe('camera problems (review focus 1)', () => {
+test.describe('camera problems', () => {
   const cases = [
     ['NotAllowedError', 'Camera access was blocked'],
     ['NotFoundError', 'No camera found'],
@@ -110,7 +115,7 @@ test.describe('camera problems (review focus 1)', () => {
   }
 });
 
-test.describe('model loading (review focus 4)', () => {
+test.describe('model loading', () => {
   test('a missing model file shows an error with Retry, and Retry recovers', async ({ page }) => {
     await page.route('**/models/model.onnx', (route) => route.fulfill({ status: 404, body: '' }));
     await page.goto('./');
@@ -143,10 +148,7 @@ test.describe('recognise', () => {
     expect(errors).toEqual([]);
   });
 
-  test('nothing in frame says so and produces no result (review focus 2)', async ({
-    page,
-    errors,
-  }) => {
+  test('nothing in frame says so and produces no result', async ({ page, errors }) => {
     await openReady(page);
     await injectEmpty(page, 40);
     await expect(page.getByTestId('tracking-status')).toHaveText('No one in view');
@@ -156,10 +158,7 @@ test.describe('recognise', () => {
     expect(errors).toEqual([]);
   });
 
-  test('a partly visible signer gets "Not sure" with a hint (review focus 2)', async ({
-    page,
-    errors,
-  }) => {
+  test('a partly visible signer gets "Not sure" with a hint', async ({ page, errors }) => {
     await openReady(page);
     await injectPartial(page, 1);
     const result = page.getByTestId('recognise-result');

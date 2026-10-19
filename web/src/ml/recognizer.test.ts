@@ -1,6 +1,6 @@
 /**
- * Review focus 2: with nothing (or too much, or only part of a person) in
- * frame, or a low-confidence model, the page must say so instead of naming a sign.
+ * With nothing (or too much, or only part of a person) in frame, or a
+ * low-confidence model, the page must say so instead of naming a sign.
  */
 import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
