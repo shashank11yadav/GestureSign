@@ -240,6 +240,8 @@ export class Session {
     }
     video.srcObject = stream;
     await video.play().catch(() => undefined);
+    // stopCamera() (e.g. the tab was hidden) may have run while the video was starting.
+    if (token !== this.startToken) return;
     this.recognizer?.reset();
     this.set({ source: 'camera' });
     try {
@@ -272,7 +274,8 @@ export class Session {
   }
 
   private onVisibility(): void {
-    if (document.visibilityState === 'hidden' && this.snapshot.source === 'camera') {
+    const source = this.snapshot.source;
+    if (document.visibilityState === 'hidden' && (source === 'camera' || source === 'starting')) {
       this.stopCamera();
       this.set({ paused: true });
     }
