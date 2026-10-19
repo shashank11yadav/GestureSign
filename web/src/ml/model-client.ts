@@ -1,4 +1,5 @@
 /** Page-side handle on the model worker, plus loading of model-meta.json and labels.json. */
+import { ASSETS, assetUrl } from './assets';
 import type { ModelInput } from './features';
 import { parseLabels, parseMeta, type ModelMeta, type SignLabel } from './meta';
 import type { ModelWorkerIn, ModelWorkerOut } from './model-protocol';
@@ -20,15 +21,11 @@ export interface LoadedModel {
   client: ModelClient;
 }
 
-function siteUrl(path: string): string {
-  return new URL(`${import.meta.env.BASE_URL}${path}`, window.location.origin).href;
-}
-
-async function fetchJson(path: string): Promise<unknown> {
-  const response = await fetch(siteUrl(path));
+async function fetchJson(name: 'modelMeta' | 'labels'): Promise<unknown> {
+  const response = await fetch(assetUrl(name));
   if (!response.ok) {
     throw new ModelLoadError(
-      `${path} could not be downloaded (HTTP ${response.status}).`,
+      `${ASSETS[name]} could not be downloaded (HTTP ${response.status}).`,
       response.status,
     );
   }
@@ -44,7 +41,7 @@ let metaRequest: Promise<ModelMeta> | null = null;
  */
 export function loadMeta(): Promise<ModelMeta> {
   if (!metaRequest) {
-    const request = fetchJson('models/model-meta.json').then(parseMeta);
+    const request = fetchJson('modelMeta').then(parseMeta);
     metaRequest = request;
     request.catch(() => {
       if (metaRequest === request) metaRequest = null;
@@ -62,11 +59,7 @@ function startWorker(worker: Worker): Promise<void> {
     worker.onerror = (event) => {
       reject(new ModelLoadError(event.message || 'the model worker failed to start'));
     };
-    const msg: ModelWorkerIn = {
-      type: 'load',
-      modelUrl: siteUrl('models/model.onnx'),
-      wasmPaths: siteUrl('vendor/ort/'),
-    };
+    const msg: ModelWorkerIn = { type: 'load' };
     worker.postMessage(msg);
   }).then((loaded) => {
     if (loaded.type === 'load-error') {
@@ -109,11 +102,7 @@ export class ModelClient {
     const worker = new Worker(new URL('./model.worker.ts', import.meta.url), { type: 'module' });
     const started = startWorker(worker);
     try {
-      const [meta, rawLabels] = await Promise.all([
-        loadMeta(),
-        fetchJson('models/labels.json'),
-        started,
-      ]);
+      const [meta, rawLabels] = await Promise.all([loadMeta(), fetchJson('labels'), started]);
       const labels = parseLabels(rawLabels, meta.classes);
       return { meta, labels, client: new ModelClient(worker) };
     } catch (error) {

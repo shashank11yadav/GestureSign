@@ -4,10 +4,12 @@
  * processes fewer frames instead of falling behind.
  */
 import { createTracker, type Tracker } from './tracker-core';
-import type { TrackerWorkerIn, TrackerWorkerOut } from './tracker-protocol';
+import { isImageBitmap, parseTrackerRequest, type TrackerWorkerOut } from './tracker-protocol';
+import { isRecord, isTrustedOrigin } from './worker-guard';
 
 interface WorkerScope {
-  onmessage: ((event: MessageEvent<TrackerWorkerIn>) => void) | null;
+  location: { origin: string };
+  onmessage: ((event: MessageEvent<unknown>) => void) | null;
   postMessage(message: TrackerWorkerOut, transfer?: Transferable[]): void;
 }
 const scope = self as unknown as WorkerScope;
@@ -15,9 +17,18 @@ const scope = self as unknown as WorkerScope;
 let tracker: Tracker | null = null;
 
 scope.onmessage = (event) => {
-  const msg = event.data;
+  if (!isTrustedOrigin(event.origin, scope.location.origin)) return;
+  const parsed = parseTrackerRequest(event.data);
+  if (!parsed.ok) {
+    // A transferred bitmap belongs to this worker now, so free it even when the message is bad.
+    const bitmap = isRecord(event.data) ? event.data['bitmap'] : undefined;
+    if (isImageBitmap(bitmap)) bitmap.close();
+    if (parsed.reply) scope.postMessage(parsed.reply);
+    return;
+  }
+  const msg = parsed.message;
   if (msg.type === 'init') {
-    createTracker(msg.options)
+    createTracker({ featureSet: msg.featureSet, delegate: msg.delegate })
       .then((created) => {
         tracker = created;
         scope.postMessage({ type: 'ready', delegate: created.delegate });

@@ -8,10 +8,6 @@ export interface TrackerFrame extends TrackedFrame {
   ms: number;
 }
 
-function siteUrl(path: string): string {
-  return new URL(`${import.meta.env.BASE_URL}${path}`, window.location.origin).href;
-}
-
 export class TrackerClient {
   private running = false;
   private busy = false;
@@ -42,15 +38,7 @@ export class TrackerClient {
       worker.onerror = (event) => {
         reject(new Error(event.message || 'the landmark worker failed to start'));
       };
-      const msg: TrackerWorkerIn = {
-        type: 'init',
-        options: {
-          wasmBase: siteUrl('vendor/mediapipe/wasm'),
-          modelBase: siteUrl('vendor/mediapipe/models/'),
-          featureSet,
-          delegate: 'GPU',
-        },
-      };
+      const msg: TrackerWorkerIn = { type: 'init', featureSet, delegate: 'GPU' };
       worker.postMessage(msg);
     }).catch((error: unknown) => {
       worker.terminate();

@@ -8,10 +8,13 @@
  * both from this site (public/models, public/vendor/ort), never from a CDN.
  */
 import * as ort from 'onnxruntime-web/wasm';
-import type { ModelWorkerIn, ModelWorkerOut } from './model-protocol';
+import { assetUrl } from './assets';
+import { parseModelRequest, type ModelWorkerOut } from './model-protocol';
+import { isTrustedOrigin } from './worker-guard';
 
 interface WorkerScope {
-  onmessage: ((event: MessageEvent<ModelWorkerIn>) => void) | null;
+  location: { origin: string };
+  onmessage: ((event: MessageEvent<unknown>) => void) | null;
   postMessage(message: ModelWorkerOut, transfer?: Transferable[]): void;
 }
 const scope = self as unknown as WorkerScope;
@@ -33,10 +36,11 @@ async function download(url: string): Promise<Uint8Array> {
   return new Uint8Array(await response.arrayBuffer());
 }
 
-async function load(modelUrl: string, wasmPaths: string): Promise<void> {
+async function load(): Promise<void> {
+  const wasmPaths = assetUrl('ortRuntime');
   // Settle both downloads before reporting, so a failure in one is never left unhandled.
   const [model, wasm] = await Promise.allSettled([
-    download(modelUrl),
+    download(assetUrl('signModel')),
     download(`${wasmPaths}${WASM_FILE}`),
   ]);
   if (model.status === 'rejected') {
@@ -89,9 +93,15 @@ async function run(id: number, data: Float32Array, frames: number, dim: number):
 }
 
 scope.onmessage = (event) => {
-  const msg = event.data;
+  if (!isTrustedOrigin(event.origin, scope.location.origin)) return;
+  const parsed = parseModelRequest(event.data);
+  if (!parsed.ok) {
+    if (parsed.reply) scope.postMessage(parsed.reply);
+    return;
+  }
+  const msg = parsed.message;
   if (msg.type === 'load') {
-    load(msg.modelUrl, msg.wasmPaths).catch((error: unknown) => {
+    load().catch((error: unknown) => {
       scope.postMessage({
         type: 'load-error',
         message: error instanceof Error ? error.message : String(error),

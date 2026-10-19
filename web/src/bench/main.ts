@@ -1,5 +1,5 @@
 /**
- * A1 benchmark (dev only, served by `vite` from bench.html, never built).
+ * Landmark benchmark (dev only, served by `vite` from bench.html, never built).
  *
  * Runs a landmark pipeline on the main thread, where DevTools CPU throttling
  * applies, against the fake camera, and runs the stub model every 5th frame on
@@ -8,6 +8,7 @@
  * Query: ?featureSet=hands_pose|hands_pose_lips&seconds=10&warmup=3&delegate=GPU|CPU
  */
 import * as ort from 'onnxruntime-web/wasm';
+import { assetUrl } from '../ml/assets';
 import { modelInput, type FeatureSet } from '../ml/features';
 import type { Frame } from '../ml/landmarks';
 import { createTracker, type Delegate } from '../ml/tracker-core';
@@ -44,8 +45,6 @@ const out = document.getElementById('out') as HTMLPreElement;
 const video = document.getElementById('video') as HTMLVideoElement;
 window.__bench = { done: false };
 
-const site = (path: string) => new URL(`${import.meta.env.BASE_URL}${path}`, location.origin).href;
-
 function gpuName(): string {
   const gl = document.createElement('canvas').getContext('webgl2');
   if (!gl) return 'no WebGL2';
@@ -66,15 +65,10 @@ async function main(): Promise<void> {
   video.srcObject = stream;
   await video.play();
 
-  const tracker = await createTracker({
-    wasmBase: site('vendor/mediapipe/wasm'),
-    modelBase: site('vendor/mediapipe/models/'),
-    featureSet,
-    delegate,
-  });
-  ort.env.wasm.wasmPaths = site('vendor/ort/');
+  const tracker = await createTracker({ featureSet, delegate });
+  ort.env.wasm.wasmPaths = assetUrl('ortRuntime');
   ort.env.wasm.numThreads = 1;
-  const modelBytes = new Uint8Array(await (await fetch(site('models/model.onnx'))).arrayBuffer());
+  const modelBytes = new Uint8Array(await (await fetch(assetUrl('signModel'))).arrayBuffer());
   const session = await ort.InferenceSession.create(modelBytes, { executionProviders: ['wasm'] });
 
   const window32: Frame[] = [];

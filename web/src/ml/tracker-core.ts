@@ -2,10 +2,11 @@
  * MediaPipe landmarkers -> 543-point frames. Shared by the tracker worker and
  * the dev-only benchmark page.
  *
- * Which landmarkers run depends on the model's feature set (decided by the A1
- * benchmark, pipeline/reports/bench.md): `hands_pose` runs the Hand and Pose
- * landmarkers; `hands_pose_lips` runs the Holistic landmarker, which also
- * gives the face mesh the lip features need.
+ * Which landmarkers run depends on the model's feature set (decided by the
+ * landmark benchmark, pipeline/reports/bench.md): `hands_pose` runs the Hand
+ * and Pose landmarkers; `hands_pose_lips` runs the Holistic landmarker, which
+ * also gives the face mesh the lip features need. Every file comes from this
+ * site (assets.ts).
  */
 import {
   FilesetResolver,
@@ -15,16 +16,13 @@ import {
   type NormalizedLandmark,
 } from '@mediapipe/tasks-vision';
 import { assembleFrame, type DetectedHand } from './assemble';
+import { assetUrl } from './assets';
 import type { FeatureSet } from './features';
 import type { Frame } from './landmarks';
 
 export type Delegate = 'GPU' | 'CPU';
 
 export interface TrackerOptions {
-  /** Absolute URL of the folder with the MediaPipe WASM files. */
-  wasmBase: string;
-  /** Absolute URL of the folder with the .task model files. */
-  modelBase: string;
   featureSet: FeatureSet;
   delegate: Delegate;
 }
@@ -86,11 +84,10 @@ const points = (list: NormalizedLandmark[] | undefined) =>
   (list ?? []).map((p) => ({ x: p.x, y: p.y, z: p.z }));
 
 async function handsAndPose(
-  opts: TrackerOptions,
   delegate: Delegate,
   models: { hand: Prefetched; pose: Prefetched },
 ): Promise<Tracker> {
-  const fileset = await FilesetResolver.forVisionTasks(opts.wasmBase, useModule);
+  const fileset = await FilesetResolver.forVisionTasks(assetUrl('mediapipeWasm'), useModule);
   const hand = await HandLandmarker.createFromOptions(fileset, {
     baseOptions: { modelAssetBuffer: models.hand.stream(), delegate },
     runningMode: 'VIDEO',
@@ -125,12 +122,8 @@ async function handsAndPose(
   };
 }
 
-async function holistic(
-  opts: TrackerOptions,
-  delegate: Delegate,
-  task: Prefetched,
-): Promise<Tracker> {
-  const fileset = await FilesetResolver.forVisionTasks(opts.wasmBase, useModule);
+async function holistic(delegate: Delegate, task: Prefetched): Promise<Tracker> {
+  const fileset = await FilesetResolver.forVisionTasks(assetUrl('mediapipeWasm'), useModule);
   const model = await HolisticLandmarker.createFromOptions(fileset, {
     baseOptions: { modelAssetBuffer: task.stream(), delegate },
     runningMode: 'VIDEO',
@@ -164,16 +157,17 @@ async function holistic(
 
 /** Builds the landmarkers, falling back from the GPU to the CPU delegate. */
 export async function createTracker(opts: TrackerOptions): Promise<Tracker> {
+  const models = assetUrl('mediapipeModels');
   let build: (delegate: Delegate) => Promise<Tracker>;
   if (opts.featureSet === 'hands_pose_lips') {
-    const model = prefetch(`${opts.modelBase}holistic_landmarker.task`);
-    build = (delegate) => holistic(opts, delegate, model);
+    const model = prefetch(`${models}holistic_landmarker.task`);
+    build = (delegate) => holistic(delegate, model);
   } else {
-    const models = {
-      hand: prefetch(`${opts.modelBase}hand_landmarker.task`),
-      pose: prefetch(`${opts.modelBase}pose_landmarker_lite.task`),
+    const tasks = {
+      hand: prefetch(`${models}hand_landmarker.task`),
+      pose: prefetch(`${models}pose_landmarker_lite.task`),
     };
-    build = (delegate) => handsAndPose(opts, delegate, models);
+    build = (delegate) => handsAndPose(delegate, tasks);
   }
   if (opts.delegate === 'GPU') {
     try {
