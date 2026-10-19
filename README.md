@@ -226,22 +226,6 @@ and in [`web/public/models/labels.json`](web/public/models/labels.json).
   scripts, workers and files, plus `'wasm-unsafe-eval'`, which WebAssembly
   needs.
 
-## What I'd do next
-
-- **Collect webcam data.** Every training clip is a portrait phone selfie,
-  and the aspect-ratio fix is a correction for that gap rather than a cure.
-  A few hundred landscape webcam clips per sign from new signers would tell
-  me how much accuracy the demo loses to the camera change, and fine-tuning
-  on them would close some of it.
-- **Use the confusion pairs.** *awake*/*wake* and *pen*/*pencil* are
-  confused in both directions. I'd like to try grouping near-synonyms when
-  scoring Practice mode, and a margin loss on the worst pairs in training.
-- **Ensemble or distil.** The strongest asl-signs competition entries
-  ensembled several models. A bigger teacher distilled into the current
-  1.4 M-parameter size might lift top-1 without slowing the page down.
-- **Fingerspelling.** A separate model for letters would cover names and
-  any word outside the 250 signs.
-
 ## Run it locally
 
 ### Web app only
