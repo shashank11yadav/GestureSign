@@ -53,7 +53,7 @@ export default defineConfig({
   server: { port: 5330, strictPort: true },
   preview: { port: 5331, strictPort: true },
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'scripts/**/*.test.mjs'],
     environment: 'node',
   },
 });

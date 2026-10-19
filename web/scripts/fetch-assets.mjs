@@ -1,24 +1,24 @@
 // Puts every runtime file the page needs under public/vendor/, so the site
 // serves them itself and the CSP can stay 'self' only:
 //   - MediaPipe .task models, downloaded from Google's model bucket at pinned
-//     versions and checked against pinned SHA-256 hashes (a mismatch fails the
-//     build);
+//     versions and checked against a pinned size and SHA-256 before anything
+//     is written to disk (a mismatch fails the build);
 //   - the MediaPipe and onnxruntime WASM runtimes, copied from node_modules,
 //     whose versions package-lock.json pins. Only onnxruntime's plain WASM
 //     build ships (no WebGPU/JSEP builds): the model is small enough that the
 //     CPU runs it in a few milliseconds.
 //
 // Which landmarker ships follows the model's feature set in
-// public/models/model-meta.json (decided by the A1 benchmark): Holistic for
+// public/models/model-meta.json (decided by the landmark benchmark): Holistic for
 // "hands_pose_lips", the Hand and Pose landmarkers for "hands_pose".
 //
 // Usage: node scripts/fetch-assets.mjs [--bench]
 //   --bench fetches every landmarker, for bench.html (dev only).
 
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { copyFile, mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const VENDOR = join(ROOT, 'public', 'vendor');
@@ -76,20 +76,56 @@ async function exists(path) {
   }
 }
 
+/**
+ * Downloads a pinned file into memory and returns it only if its size and
+ * SHA-256 match the pins. Reading stops as soon as the body grows past the
+ * pinned size, so a wrong or hostile response cannot fill memory.
+ */
+export async function downloadVerified(pinned, fetchImpl = fetch) {
+  const response = await fetchImpl(pinned.url);
+  if (!response.ok || !response.body) throw new Error(`${pinned.url}: HTTP ${response.status}`);
+  const chunks = [];
+  let size = 0;
+  for await (const chunk of response.body) {
+    size += chunk.byteLength;
+    if (size > pinned.bytes) {
+      await response.body.cancel().catch(() => undefined);
+      throw new Error(`${pinned.file}: response is larger than the pinned ${pinned.bytes} bytes`);
+    }
+    chunks.push(chunk);
+  }
+  if (size !== pinned.bytes) {
+    throw new Error(`${pinned.file}: got ${size} bytes, expected the pinned ${pinned.bytes}`);
+  }
+  const body = Buffer.concat(chunks);
+  const digest = createHash('sha256').update(body).digest('hex');
+  if (digest !== pinned.sha256) {
+    throw new Error(`${pinned.file}: SHA-256 ${digest} does not match the pinned ${pinned.sha256}`);
+  }
+  return body;
+}
+
+/**
+ * Writes through a new, uniquely named temporary file and renames it into
+ * place, so `dest` only ever holds a complete, verified file.
+ */
+export async function writeAtomic(dest, body) {
+  const tmp = `${dest}.${randomBytes(6).toString('hex')}.part`;
+  try {
+    await writeFile(tmp, body, { flag: 'wx' });
+    await rename(tmp, dest);
+  } catch (error) {
+    await rm(tmp, { force: true });
+    throw error;
+  }
+}
+
 async function fetchModel(model) {
   const dest = join(VENDOR, 'mediapipe', 'models', model.file);
   if ((await exists(dest)) && (await sha256(dest)) === model.sha256) return 'cached';
+  const body = await downloadVerified(model);
   await mkdir(dirname(dest), { recursive: true });
-  const response = await fetch(model.url);
-  if (!response.ok) throw new Error(`${model.url}: HTTP ${response.status}`);
-  const body = Buffer.from(await response.arrayBuffer());
-  const digest = createHash('sha256').update(body).digest('hex');
-  if (digest !== model.sha256) {
-    throw new Error(`${model.file}: SHA-256 ${digest} does not match the pinned ${model.sha256}`);
-  }
-  const tmp = `${dest}.part`;
-  await writeFile(tmp, body);
-  await rename(tmp, dest);
+  await writeAtomic(dest, body);
   return 'downloaded';
 }
 
@@ -123,7 +159,10 @@ async function main() {
   console.log(`copied     runtime files from node_modules`);
 }
 
-main().catch((error) => {
-  console.error(`fetch-assets: ${error instanceof Error ? error.message : String(error)}`);
-  process.exit(1);
-});
+// Run as a script; importing the module (from its tests) does nothing.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((error) => {
+    console.error(`fetch-assets: ${error instanceof Error ? error.message : String(error)}`);
+    process.exit(1);
+  });
+}
