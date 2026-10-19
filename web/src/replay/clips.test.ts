@@ -57,3 +57,57 @@ describe('replay clips', () => {
     await expect(loadReplayClips(fake, '/')).rejects.toThrow('404');
   });
 });
+
+describe('a damaged replay file', () => {
+  const clip = (patch: Record<string, unknown> = {}) => ({
+    id: 'c1',
+    title: 'hello',
+    sign: 'hello',
+    note: '',
+    fps: 30,
+    frames: [
+      [0.5, 0.5, null, null],
+      [0.4, 0.6, 0.1, 0.2],
+    ],
+    ...patch,
+  });
+  const file = (patch: Record<string, unknown> = {}, clipPatch: Record<string, unknown> = {}) => ({
+    source: 'synthetic',
+    points: [0, 468],
+    clips: [clip(clipPatch)],
+    ...patch,
+  });
+
+  it('decodes a small valid file', () => {
+    const { clips } = decodeReplay(file());
+    expect(clips[0]?.frames[1]?.[468 * 3 + 1]).toBeCloseTo(0.2);
+    expect(Number.isNaN(clips[0]?.frames[0]?.[468 * 3] ?? 0)).toBe(true);
+  });
+
+  it.each([
+    ['a point outside the 543-point frame', { points: [0, 543] }],
+    ['a negative point', { points: [-1, 0] }],
+    ['a fractional point', { points: [0.5, 1] }],
+    ['a point that is not a number', { points: ['0', 1] }],
+    ['no clips array', { clips: 'none' }],
+    ['too many clips', { clips: Array.from({ length: 101 }, () => clip()) }],
+  ])('is refused when it has %s', (_, patch) => {
+    expect(() => decodeReplay(file(patch))).toThrow(/replay clips/);
+  });
+
+  it.each([
+    ['a frame rate of zero', { fps: 0 }],
+    ['a negative frame rate', { fps: -30 }],
+    ['an absurd frame rate', { fps: 1e9 }],
+    ['no frames', { frames: [] }],
+    ['a frame that is not an array', { frames: [null] }],
+    ['a frame of the wrong length', { frames: [[0.5, 0.5]] }],
+    ['a coordinate that is a string', { frames: [['0.5', 0.5, null, null]] }],
+    ['an infinite coordinate', { frames: [[Number.POSITIVE_INFINITY, 0.5, null, null]] }],
+    ['too many frames', { frames: Array.from({ length: 5000 }, () => [0, 0, 0, 0]) }],
+    ['a missing id', { id: undefined }],
+    ['a title that is an object', { title: { toString: 'x' } }],
+  ])('is refused when a clip has %s', (_, patch) => {
+    expect(() => decodeReplay(file({}, patch))).toThrow(/replay clips/);
+  });
+});

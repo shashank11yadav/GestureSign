@@ -9,7 +9,7 @@
  * (asl-signs is CC BY 4.0, so each real clip carries the dataset credit).
  * Swapping the source means changing only the pipeline command or this function.
  */
-import { emptyFrame, type Frame } from '../ml/landmarks';
+import { emptyFrame, N_POINTS, type Frame } from '../ml/landmarks';
 
 export interface ReplayClip {
   id: string;
@@ -28,45 +28,85 @@ export interface ReplayFile {
   clips: ReplayClip[];
 }
 
+/**
+ * Limits well above what the pipeline writes (64 frames at 30 fps, six
+ * clips), so a damaged or hostile file is refused instead of stalling the
+ * page. In particular a frame rate of zero would make playback spin forever.
+ */
+const MAX_CLIPS = 100;
+const MAX_FRAMES = 1000;
+const MIN_FPS = 1;
+const MAX_FPS = 240;
+
+class ReplayFormatError extends Error {
+  constructor(what: string) {
+    super(`replay clips: ${what}`);
+  }
+}
+
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
 
-export function decodeReplay(raw: unknown): ReplayFile {
-  if (!isRecord(raw) || !Array.isArray(raw['points']) || !Array.isArray(raw['clips'])) {
-    throw new Error('replay clips: unexpected format');
+function isPointList(v: unknown): v is number[] {
+  return (
+    Array.isArray(v) &&
+    v.length <= N_POINTS &&
+    v.every((p) => typeof p === 'number' && Number.isInteger(p) && p >= 0 && p < N_POINTS)
+  );
+}
+
+function decodeFrame(flat: unknown, points: readonly number[]): Frame {
+  if (!Array.isArray(flat) || flat.length !== 2 * points.length) {
+    throw new ReplayFormatError('bad frame');
   }
-  const points = raw['points'] as number[];
+  const frame = emptyFrame();
+  points.forEach((point, i) => {
+    const x: unknown = flat[2 * i];
+    const y: unknown = flat[2 * i + 1];
+    if (x === null || y === null) return;
+    if (typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x + y)) {
+      throw new ReplayFormatError('bad coordinate');
+    }
+    frame[point * 3] = x;
+    frame[point * 3 + 1] = y;
+    frame[point * 3 + 2] = 0;
+  });
+  return frame;
+}
+
+function decodeClip(c: unknown, points: readonly number[], credit: string | null): ReplayClip {
+  if (!isRecord(c) || typeof c['id'] !== 'string' || typeof c['title'] !== 'string') {
+    throw new ReplayFormatError('bad clip');
+  }
+  const { fps, frames } = c;
+  if (typeof fps !== 'number' || !(fps >= MIN_FPS && fps <= MAX_FPS)) {
+    throw new ReplayFormatError('bad frame rate');
+  }
+  if (!Array.isArray(frames) || frames.length === 0 || frames.length > MAX_FRAMES) {
+    throw new ReplayFormatError('bad frame count');
+  }
+  return {
+    id: c['id'],
+    title: c['title'],
+    sign: typeof c['sign'] === 'string' ? c['sign'] : null,
+    note: typeof c['note'] === 'string' ? c['note'] : '',
+    credit,
+    fps,
+    frames: frames.map((flat) => decodeFrame(flat, points)),
+  };
+}
+
+export function decodeReplay(raw: unknown): ReplayFile {
+  if (!isRecord(raw) || !isPointList(raw['points']) || !Array.isArray(raw['clips'])) {
+    throw new ReplayFormatError('unexpected format');
+  }
+  const points = raw['points'];
   const source = raw['source'] === 'asl-signs' ? 'asl-signs' : 'synthetic';
   const credit = typeof raw['credit'] === 'string' ? raw['credit'] : null;
-  if (source === 'asl-signs' && !credit)
-    throw new Error('replay clips: dataset clips need a credit');
-  const clips = raw['clips'].map((c: unknown): ReplayClip => {
-    if (!isRecord(c) || !Array.isArray(c['frames']) || typeof c['fps'] !== 'number') {
-      throw new Error('replay clips: bad clip');
-    }
-    const frames = (c['frames'] as (number | null)[][]).map((flat) => {
-      const frame = emptyFrame();
-      points.forEach((point, i) => {
-        const x = flat[2 * i];
-        const y = flat[2 * i + 1];
-        if (x == null || y == null) return;
-        frame[point * 3] = x;
-        frame[point * 3 + 1] = y;
-        frame[point * 3 + 2] = 0;
-      });
-      return frame;
-    });
-    return {
-      id: String(c['id']),
-      title: String(c['title']),
-      sign: typeof c['sign'] === 'string' ? c['sign'] : null,
-      note: typeof c['note'] === 'string' ? c['note'] : '',
-      credit,
-      fps: c['fps'],
-      frames,
-    };
-  });
+  if (source === 'asl-signs' && !credit) throw new ReplayFormatError('dataset clips need a credit');
+  if (raw['clips'].length > MAX_CLIPS) throw new ReplayFormatError('too many clips');
+  const clips = raw['clips'].map((c: unknown) => decodeClip(c, points, credit));
   return { source, clips };
 }
 
