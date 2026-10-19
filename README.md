@@ -8,8 +8,6 @@ tracking and the model both run on your device, and no video leaves the page.
 
 **Try it:** https://shashank11yadav.github.io/GestureSign/
 
-Built by [Shashank Yadav](https://github.com/shashank11yadav).
-
 ![Replay mode playing four held-out asl-signs clips (blue, smile, giraffe, hello) through the trained model, with the top three guesses for each](docs/demo.gif)
 
 *Replay mode: real clips from signers the model never trained on, played as
