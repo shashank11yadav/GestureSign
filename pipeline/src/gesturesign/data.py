@@ -12,7 +12,7 @@ import io
 import zipfile
 from collections.abc import Iterator
 from contextlib import contextmanager
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import BinaryIO, Protocol
 
 import numpy as np
@@ -43,12 +43,23 @@ class FolderSource:
     def __init__(self, location: Path) -> None:
         self.location = location
 
+    def _path(self, rel: str) -> Path:
+        # Paths come from train.csv, so refuse any that leave the dataset folder.
+        # The check is on the path itself, so symlinked data folders still work.
+        parts = PurePosixPath(rel).parts
+        if not parts or PurePosixPath(rel).is_absolute() or ".." in parts:
+            raise DataError(f"{rel}: path points outside the dataset folder")
+        return self.location.joinpath(*parts)
+
     def exists(self, rel: str) -> bool:
-        return (self.location / rel).exists()
+        try:
+            return self._path(rel).exists()
+        except DataError:
+            return False
 
     @contextmanager
     def open(self, rel: str) -> Iterator[BinaryIO]:
-        with (self.location / rel).open("rb") as fh:
+        with self._path(rel).open("rb") as fh:
             yield fh
 
 

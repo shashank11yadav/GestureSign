@@ -104,7 +104,9 @@ class TrainResult:
 
 
 def load_checkpoint(path: Path) -> tuple[SignModel, Config, list[str], dict[str, Any]]:
-    state = torch.load(path, map_location="cpu", weights_only=False)
+    # weights_only: a checkpoint is tensors, plain dicts, lists and numbers, so
+    # refuse anything else instead of unpickling (and running) arbitrary objects.
+    state = torch.load(path, map_location="cpu", weights_only=True)
     cfg = config_from_dict(state["config"], path.name)
     model = build_model(cfg, len(state["labels"]))
     model.load_state_dict(state["model"])

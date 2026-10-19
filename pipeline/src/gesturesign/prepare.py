@@ -208,7 +208,9 @@ class LandmarkCache:
             k: [] for k in ("points", "lengths", "labels", "participants", "sequence_ids")
         }
         for name in manifest["shards"]:
-            with np.load(cache_dir / name) as shard:
+            if not isinstance(name, str) or Path(name).name != name or not name.endswith(".npz"):
+                raise DataError(f"cache manifest lists a bad shard name: {name!r}")
+            with np.load(cache_dir / name, allow_pickle=False) as shard:
                 for key, values in parts.items():
                     values.append(shard[key])
         lengths = np.concatenate(parts["lengths"]).astype(np.int32)
