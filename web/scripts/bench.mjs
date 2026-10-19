@@ -1,5 +1,5 @@
 /* global window -- referenced inside page.evaluate callbacks, which run in the browser */
-// A1 benchmark: decides the model's feature set (spec 4.1).
+// Landmark benchmark: decides the model's feature set.
 //
 // Serves bench.html with Vite, opens it in Chrome with a synthetic fake camera
 // (a synthetic y4m clip of a drawn figure) and DevTools CPU throttling, and
@@ -60,9 +60,9 @@ function markdown(results, decision, holistic4x) {
     )
     .join('\n');
   const first = results[0];
-  return `# A1: landmark benchmark
+  return `# Landmark benchmark
 
-Decides which landmarks the model uses (spec 4.1). Written by \`npm run bench\`
+Decides which landmarks the model uses. Written by \`npm run bench\`
 (web/scripts/bench.mjs); re-run it to reproduce.
 
 **Rule:** Holistic at least ${THRESHOLD_FPS} fps with 4x CPU throttling -> \`hands_pose_lips\`,

@@ -3,7 +3,7 @@
 Everything the browser needs to behave honestly is decided here, from data the
 model never trained on:
 
-* **Ship set** (spec 4.1): greedy backward elimination on the *validation*
+* **Ship set**: greedy backward elimination on the *validation*
   signers. Start with every sign; while top-1 restricted to the remaining signs
   is below ``ship_min_top1``, drop the sign with the lowest per-sign accuracy
   (ties: the one most often predicted wrongly, since removing it helps others).

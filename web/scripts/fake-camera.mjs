@@ -1,4 +1,4 @@
-// Synthetic fake-camera clip for the A1 benchmark: a drawn, front-facing
+// Synthetic fake-camera clip for the landmark benchmark: a drawn, front-facing
 // figure (face with eyes, brows, nose and mouth, hair, neck, shirt) moving
 // two open hands in front of the chest. No real person is involved. The
 // drawing is crude, so MediaPipe may or may not detect it; bench.mjs reports

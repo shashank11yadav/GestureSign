@@ -3,7 +3,7 @@
 name = "default"
 seed = 42
 
-# Decided by the A1 browser benchmark (pipeline/reports/bench.md): the Holistic
+# Decided by the browser landmark benchmark (pipeline/reports/bench.md): the Holistic
 # landmarker sustained 16.8 fps (median of 3 runs) under 4x CPU throttling,
 # above the 15 fps bar, so the browser runs Holistic and the model sees hands,
 # upper-body pose and 40 lip points. "hands_pose" is the fallback.

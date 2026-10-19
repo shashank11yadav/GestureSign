@@ -94,7 +94,7 @@ class EvalConfig:
 class Config:
     name: str = "default"
     seed: int = 42
-    # Decided by the A1 benchmark; see pipeline/reports/bench.md.
+    # Decided by the landmark benchmark; see pipeline/reports/bench.md.
     feature_set: FeatureSet = "hands_pose_lips"
     fps: float = 30.0
     source_fps: float = 30.0
