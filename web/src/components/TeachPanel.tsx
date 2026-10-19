@@ -5,6 +5,7 @@ import { GestureStore } from '../lib/gesture-store';
 import type { LoadedModel } from '../ml/model-client';
 import {
   MAX_GESTURES,
+  MAX_NAME_LENGTH,
   MAX_TAKES,
   MIN_TAKES,
   addTake,
@@ -34,6 +35,7 @@ function TakeDots({ count }: { count: number }) {
 
 export function TeachPanel({ session, model }: { session: Session; model: LoadedModel }) {
   const version = model.meta.version;
+  const embeddingDim = model.meta.embeddingDim;
   const [gestures, setGestures] = useState<Gesture[]>([]);
   const [armed, setArmed] = useState<string | null>(null);
   const [match, setMatch] = useState<GestureMatch | null>(null);
@@ -46,14 +48,17 @@ export function TeachPanel({ session, model }: { session: Session; model: Loaded
   useEffect(() => {
     let cancelled = false;
     store
-      .load(version)
-      .then(({ gestures: saved, discarded }) => {
+      .load(version, embeddingDim)
+      .then(({ gestures: saved, discarded, unreadable }) => {
         if (cancelled) return;
         setGestures(saved);
+        const were = (n: number) => `${n} saved gesture${n === 1 ? ' was' : 's were'}`;
         if (discarded) {
           setNotice(
-            `${discarded} saved gesture${discarded === 1 ? ' was' : 's were'} taught with a different model version and had to be removed.`,
+            `${were(discarded)} taught with a different model version and had to be removed.`,
           );
+        } else if (unreadable) {
+          setNotice(`${were(unreadable)} unreadable and had to be removed.`);
         }
       })
       .catch(() => {
@@ -63,7 +68,7 @@ export function TeachPanel({ session, model }: { session: Session; model: Loaded
     return () => {
       cancelled = true;
     };
-  }, [version]);
+  }, [version, embeddingDim]);
 
   // Results arrive after renders commit, so the ref always holds the current list.
   const gesturesRef = useRef(gestures);
@@ -168,7 +173,7 @@ export function TeachPanel({ session, model }: { session: Session; model: Loaded
             onChange={(e) => {
               setName(e.target.value);
             }}
-            maxLength={40}
+            maxLength={MAX_NAME_LENGTH}
             placeholder="e.g. wave, thumbs up"
             aria-invalid={formError ? true : undefined}
             aria-describedby={formError ? `${inputId}-error` : undefined}

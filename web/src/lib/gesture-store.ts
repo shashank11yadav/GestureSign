@@ -3,8 +3,12 @@
  * vectors (never video). Embeddings only make sense for the model that
  * produced them, so gestures saved under another model version are dropped
  * on load and the page says so.
+ *
+ * Stored records are checked on load like any other input: one that is
+ * damaged (or edited by hand in DevTools) is removed rather than allowed to
+ * break the page, and nothing larger than the page itself would save is read.
  */
-import type { Gesture } from '../ml/prototypes';
+import { MAX_GESTURES, MAX_NAME_LENGTH, MAX_TAKES, type Gesture } from '../ml/prototypes';
 
 const DB_NAME = 'gesturesign';
 const STORE = 'gestures';
@@ -15,6 +19,34 @@ interface StoredGesture {
   takes: number[][];
   modelVersion: string;
   updatedAt: number;
+}
+
+/** IDs are crypto.randomUUID(); this is generous. */
+const MAX_ID_LENGTH = 100;
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
+
+function isTake(v: unknown, dim: number): v is number[] {
+  return (
+    Array.isArray(v) &&
+    v.length === dim &&
+    v.every((x) => typeof x === 'number' && Number.isFinite(x))
+  );
+}
+
+/** The record if it has the shape save() writes, else null. */
+export function readStoredGesture(raw: unknown, embeddingDim: number): StoredGesture | null {
+  if (!isRecord(raw)) return null;
+  const { id, name, takes, modelVersion, updatedAt } = raw;
+  if (typeof id !== 'string' || id.length === 0 || id.length > MAX_ID_LENGTH) return null;
+  if (typeof name !== 'string' || name.length === 0 || name.length > MAX_NAME_LENGTH) return null;
+  if (typeof modelVersion !== 'string') return null;
+  if (typeof updatedAt !== 'number' || !Number.isFinite(updatedAt)) return null;
+  if (!Array.isArray(takes) || takes.length > MAX_TAKES) return null;
+  if (!takes.every((t) => isTake(t, embeddingDim))) return null;
+  return { id, name, takes, modelVersion, updatedAt };
 }
 
 function request<T>(req: IDBRequest<T>): Promise<T> {
@@ -71,26 +103,43 @@ export class GestureStore {
     return done;
   }
 
-  /** Gestures saved for this model version; others are deleted and counted. */
-  async load(modelVersion: string): Promise<{ gestures: Gesture[]; discarded: number }> {
-    const all = await request(
-      (await this.store('readonly')).getAll() as IDBRequest<StoredGesture[]>,
-    );
-    const keep = all.filter((g) => g.modelVersion === modelVersion);
-    const stale = all.filter((g) => g.modelVersion !== modelVersion);
-    if (stale.length) {
-      await this.write((store) => {
-        for (const g of stale) store.delete(g.id);
+  /**
+   * Gestures saved for this model version, oldest first and at most
+   * MAX_GESTURES. Records for another model version (`discarded`) and records
+   * that cannot be read (`unreadable`) are deleted and counted.
+   */
+  async load(
+    modelVersion: string,
+    embeddingDim: number,
+  ): Promise<{ gestures: Gesture[]; discarded: number; unreadable: number }> {
+    const store = await this.store('readonly');
+    const [keys, values] = await Promise.all([
+      request(store.getAllKeys()),
+      request(store.getAll() as IDBRequest<unknown[]>),
+    ]);
+    const keep: StoredGesture[] = [];
+    const stale: IDBValidKey[] = [];
+    const broken: IDBValidKey[] = [];
+    keys.forEach((key, i) => {
+      const g = readStoredGesture(values[i], embeddingDim);
+      if (!g || g.id !== key) broken.push(key);
+      else if (g.modelVersion === modelVersion) keep.push(g);
+      else stale.push(key);
+    });
+    if (stale.length || broken.length) {
+      await this.write((s) => {
+        for (const key of [...stale, ...broken]) s.delete(key);
       });
     }
     keep.sort((a, b) => a.updatedAt - b.updatedAt);
     return {
-      gestures: keep.map((g) => ({
+      gestures: keep.slice(0, MAX_GESTURES).map((g) => ({
         id: g.id,
         name: g.name,
         takes: g.takes.map((t) => Float32Array.from(t)),
       })),
       discarded: stale.length,
+      unreadable: broken.length,
     };
   }
 
