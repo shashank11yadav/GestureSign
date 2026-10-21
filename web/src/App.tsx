@@ -11,7 +11,7 @@ import { SiteHeader } from './components/SiteHeader';
 import { Stage } from './components/Stage';
 import { TeachPanel } from './components/TeachPanel';
 import { Card } from './components/ui';
-import { AUTHOR_URL, DATASET_CREDIT, REPO_URL } from './links';
+import { AUTHOR_URL, DATASET_CREDIT, PORTFOLIO_URL, REPO_URL } from './links';
 
 export function App({ session }: { session: Session }) {
   const snap = useSyncExternalStore(session.subscribe, session.getSnapshot);
@@ -106,6 +106,10 @@ export function App({ session }: { session: Session }) {
             GestureSign by{' '}
             <a href={AUTHOR_URL} className="underline underline-offset-2">
               Shashank Yadav
+            </a>{' '}
+            ·{' '}
+            <a href={PORTFOLIO_URL} className="underline underline-offset-2">
+              shashankyadav.dev
             </a>{' '}
             ·{' '}
             <a href={REPO_URL} className="underline underline-offset-2">
