@@ -26,9 +26,9 @@
     "cold-start": "node scripts/cold-start.mjs"
   },
   "dependencies": {
-    "@mediapipe/tasks-vision": "1.1.1",
-    "lucide-react": "1.61.0",
-    "onnxruntime-web": "1.30.0",
+    "@mediapipe/tasks-vision": "1.2.0",
+    "lucide-react": "1.62.0",
+    "onnxruntime-web": "1.31.1",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
@@ -49,7 +49,7 @@
     "prettier": "3.9.10",
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.72.0",
+    "typescript-eslint": "8.72.1",
     "vite": "8.3.5",
     "vitest": "5.0.5"
   }
